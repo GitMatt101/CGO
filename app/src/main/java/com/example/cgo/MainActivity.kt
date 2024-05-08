@@ -6,11 +6,19 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.material3.Surface
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import com.example.cgo.ui.OCGNavGraph
+import com.example.cgo.ui.OCGRoute
+import com.example.cgo.ui.composables.AppBar
+import com.example.cgo.ui.composables.MenuBar
 import com.example.cgo.ui.theme.CGOTheme
 
 class MainActivity : ComponentActivity() {
@@ -19,29 +27,42 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             CGOTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    val navController = rememberNavController()
+                    val backStackEntry by navController.currentBackStackEntryAsState()
+                    val currentRoute by remember {
+                        derivedStateOf {
+                            OCGRoute.routes.find {
+                                it.route == backStackEntry?.destination?.route
+                            } ?: OCGRoute.Login
+                        }
+                    }
+
+                    if (currentRoute.route != OCGRoute.Login.route && currentRoute.route != OCGRoute.Registration.route) {
+                        Scaffold(
+                            topBar = { AppBar(navController, currentRoute) },
+                            bottomBar = { MenuBar(navController, currentRoute) }
+                        ) { contentPadding ->
+                            OCGNavGraph(
+                                navController,
+                                modifier =  Modifier.padding(contentPadding)
+                            )
+                        }
+                    } else {
+                        Scaffold(
+                            topBar = { AppBar(navController, currentRoute) }
+                        ) { contentPadding ->
+                            OCGNavGraph(
+                                navController,
+                                modifier =  Modifier.padding(contentPadding)
+                            )
+                        }
+                    }
                 }
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    CGOTheme {
-        Greeting("Android")
     }
 }
