@@ -18,7 +18,7 @@ import com.example.cgo.R
 import com.example.cgo.ui.OCGRoute
 
 @Composable
-fun MenuBar(navController: NavHostController, currentRoute: OCGRoute) {
+fun MenuBar(navController: NavHostController) {
     BottomAppBar(
         containerColor = MaterialTheme.colorScheme.primaryContainer,
         contentColor = MaterialTheme.colorScheme.onPrimaryContainer
@@ -27,32 +27,32 @@ fun MenuBar(navController: NavHostController, currentRoute: OCGRoute) {
             Spacer(modifier = Modifier.weight(1.0f, true))
 
             IconButton(onClick = {
-                if (currentRoute.route != OCGRoute.Home.route)
-                    navController.navigate(OCGRoute.Home.route)
+                navController.popBackStack()
+                navController.navigate(OCGRoute.Home.route)
             }) {
                 MenuIcon(painterResource(id = R.drawable.home), "Home", 80)
             }
 
             Spacer(modifier = Modifier.weight(1.0f, true))
             IconButton(onClick = {
-                if (currentRoute.route != OCGRoute.Search.route)
-                    navController.navigate(OCGRoute.Search.route)
+                navController.popBackStack()
+                navController.navigate(OCGRoute.Search.route)
             }) {
                 MenuIcon(painterResource(id = R.drawable.search), "Search", 80)
             }
 
             Spacer(modifier = Modifier.weight(1.0f, true))
             IconButton(onClick = {
-                if (currentRoute.route != OCGRoute.AddEvent.route)
-                    navController.navigate(OCGRoute.AddEvent.route)
+                navController.popBackStack()
+                navController.navigate(OCGRoute.AddEvent.route)
             }) {
                 MenuIcon(painterResource(id = R.drawable.add), "Add Event", 80)
             }
 
             Spacer(modifier = Modifier.weight(1.0f, true))
             IconButton(onClick = {
-                if (currentRoute.route != OCGRoute.Rankings.route)
-                    navController.navigate(OCGRoute.Rankings.route)
+                navController.popBackStack()
+                navController.navigate(OCGRoute.Rankings.route)
             }) {
                 MenuIcon(painterResource(id = R.drawable.trophy), "Rankings", 70)
             }
@@ -60,8 +60,8 @@ fun MenuBar(navController: NavHostController, currentRoute: OCGRoute) {
             Spacer(modifier = Modifier.weight(1.0f, true))
             // TODO: Change onClick() to: navController.navigate(OCGRoute.Profile.buildRoute(user.id.toString()))
             IconButton(onClick = {
-                if (currentRoute.route != OCGRoute.Profile.route)
-                    navController.navigate(OCGRoute.Profile.route)
+                navController.popBackStack()
+                navController.navigate(OCGRoute.Profile.route)
             }) {
                 MenuIcon(painterResource(id = R.drawable.profile), "Profile", 80)
             }

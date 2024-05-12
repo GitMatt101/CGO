@@ -46,6 +46,7 @@ fun AppBar(
             }
         },
         actions = {
+            // While in the profile screen the user can access the app's settings
             if (currentRoute.route == OCGRoute.Profile.route) {
                 IconButton(onClick = { navController.navigate(OCGRoute.Settings.route) }) {
                     Icon(Icons.Outlined.Settings, "Settings")

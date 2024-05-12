@@ -44,7 +44,7 @@ class MainActivity : ComponentActivity() {
                     if (currentRoute.route != OCGRoute.Login.route && currentRoute.route != OCGRoute.Registration.route) {
                         Scaffold(
                             topBar = { AppBar(navController, currentRoute) },
-                            bottomBar = { MenuBar(navController, currentRoute) }
+                            bottomBar = { MenuBar(navController) }
                         ) { contentPadding ->
                             OCGNavGraph(
                                 navController,

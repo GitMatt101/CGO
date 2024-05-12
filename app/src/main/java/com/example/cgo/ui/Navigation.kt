@@ -37,7 +37,7 @@ sealed class OCGRoute(
     data object EventDetails : OCGRoute(
         "events/{eventID}",
         "Event Details",
-        listOf(navArgument("eventID") { type = NavType.StringType })
+        listOf(navArgument("eventID") { type = NavType.IntType })
     ) {
         fun buildRoute(eventID: String) = "events/$eventID"
     }
