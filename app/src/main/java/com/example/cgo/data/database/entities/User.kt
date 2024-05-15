@@ -20,7 +20,7 @@ data class User(
     val password: String,
 
     @ColumnInfo
-    val profilePicture: Blob,
+    val profilePicture: String?,
 
     @ColumnInfo
     val gamesWon: Int,

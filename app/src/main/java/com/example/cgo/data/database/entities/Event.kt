@@ -23,7 +23,7 @@ data class Event(
     val description: String,
 
     @ColumnInfo
-    val date: Date,
+    val date: String,
 
     @ColumnInfo
     val location: String,

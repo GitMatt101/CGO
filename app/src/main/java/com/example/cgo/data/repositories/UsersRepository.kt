@@ -1,7 +1,8 @@
 package com.example.cgo.data.repositories
 
+import android.content.ContentResolver
 import com.example.cgo.data.database.entities.User
-import com.example.cgo.data.database.DAOs.UserDAO
+import com.example.cgo.data.database.daos.UserDAO
 import kotlinx.coroutines.flow.Flow
 
 class UsersRepository(

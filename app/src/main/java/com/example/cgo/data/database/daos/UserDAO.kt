@@ -1,4 +1,4 @@
-package com.example.cgo.data.database.DAOs
+package com.example.cgo.data.database.daos
 
 import androidx.room.Dao
 import androidx.room.Delete
