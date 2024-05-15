@@ -5,6 +5,7 @@ import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import androidx.room.Relation
+import java.sql.Blob
 import java.util.Date
 
 enum class PrivacyType {
@@ -53,6 +54,12 @@ data class User(
 
     @ColumnInfo
     val password: String,
+
+    @ColumnInfo
+    val profilePicture: Blob,
+
+    @ColumnInfo
+    val gamesWon: Int,
 )
 
 data class UserWithEvents(
