@@ -1,8 +1,7 @@
 package com.example.cgo.data.repositories
 
-import com.example.cgo.data.database.Event
-import com.example.cgo.data.database.EventDAO
-import com.example.cgo.data.database.UserDAO
+import com.example.cgo.data.database.entities.Event
+import com.example.cgo.data.database.DAOs.EventDAO
 import kotlinx.coroutines.flow.Flow
 
 class EventsRepository(
