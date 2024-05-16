@@ -1,13 +1,19 @@
 package com.example.cgo.ui
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
+import com.example.cgo.ui.controllers.UsersViewModel
+import com.example.cgo.ui.screens.registration.RegistrationScreen
+import com.example.cgo.ui.screens.registration.RegistrationViewModel
+import org.koin.androidx.compose.koinViewModel
 
 sealed class OCGRoute(
     val route: String,
@@ -52,7 +58,8 @@ fun OCGNavGraph(
     navController: NavHostController,
     modifier: Modifier = Modifier
 ) {
-    // TODO: Add koinViewModel and state
+    val usersViewModel = koinViewModel<UsersViewModel>()
+    val usersState by usersViewModel.state.collectAsStateWithLifecycle()
 
     NavHost(
         navController = navController,
@@ -66,7 +73,14 @@ fun OCGNavGraph(
         }
         with(OCGRoute.Registration) {
             composable(route) {
-                // TODO: Open registration screen
+                val registrationViewModel = koinViewModel<RegistrationViewModel>()
+                val state by registrationViewModel.state.collectAsStateWithLifecycle()
+                RegistrationScreen(
+                    state = state,
+                    actions = registrationViewModel.actions,
+                    onSubmit = { /*TODO: add user view model*/ },
+                    navController = navController
+                )
             }
         }
         with(OCGRoute.Home) {

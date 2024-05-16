@@ -4,6 +4,9 @@ import androidx.room.Room
 import com.example.cgo.data.database.CGODatabase
 import com.example.cgo.data.repositories.EventsRepository
 import com.example.cgo.data.repositories.UsersRepository
+import com.example.cgo.ui.controllers.UsersViewModel
+import com.example.cgo.ui.screens.registration.RegistrationViewModel
+import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
 val appModule = module {
@@ -27,4 +30,8 @@ val appModule = module {
             // get<Context>().applicationContext.contentResolver
         )
     }
+
+    viewModel { RegistrationViewModel() }
+
+    viewModel { UsersViewModel(get()) }
 }

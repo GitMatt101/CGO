@@ -59,15 +59,25 @@ fun AppBar(
     )
     if (currentRoute.route == OCGRoute.Login.route) {
         Column(
-            modifier = Modifier.fillMaxWidth().fillMaxHeight(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight(),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            // TODO: REMOVE THIS - USED FOR TESTING
             Button(onClick = {
                 navController.popBackStack()
                 navController.navigate(OCGRoute.Home.route)
-            })
-            { Text("Login") }
+            }) {
+                Text("Login")
+            }
+            // TODO: REMOVE THIS - USED FOR TESTING
+            Button(
+                onClick = { navController.navigate(OCGRoute.Registration.route) }
+            ) {
+                Text(text = "Registration")
+            }
         }
     }
 }
