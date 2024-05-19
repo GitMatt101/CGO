@@ -3,7 +3,6 @@ package com.example.cgo.data.database.entities
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import java.sql.Blob
 
 @Entity()
 data class User(
