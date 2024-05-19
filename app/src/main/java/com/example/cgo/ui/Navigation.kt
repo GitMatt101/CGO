@@ -1,14 +1,18 @@
 package com.example.cgo.ui
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
-
+import com.example.cgo.ui.controllers.EventsViewModel
+import com.example.cgo.ui.screens.home.HomeScreen
+import org.koin.androidx.compose.koinViewModel
 sealed class OCGRoute(
     val route: String,
     val title: String,
@@ -43,7 +47,18 @@ sealed class OCGRoute(
     }
 
     companion object {
-        val routes = setOf(Login, Registration, Home, Search, AddEvent, Rankings, Profile, Settings, EventsMap, EventDetails)
+        val routes = setOf(
+            Login,
+            Registration,
+            Home,
+            Search,
+            AddEvent,
+            Rankings,
+            Profile,
+            Settings,
+            EventsMap,
+            EventDetails
+        )
     }
 }
 
@@ -53,12 +68,19 @@ fun OCGNavGraph(
     modifier: Modifier = Modifier
 ) {
     // TODO: Add koinViewModel and state
+    val eventsVm = koinViewModel<EventsViewModel>()
+    val eventsState by eventsVm.state.collectAsStateWithLifecycle()
 
     NavHost(
         navController = navController,
         startDestination = OCGRoute.Login.route,
         modifier = modifier
     ) {
+        with(OCGRoute.Home) {
+            composable(route) {
+                HomeScreen(eventsState, navController)
+            }
+        }
         with(OCGRoute.Login) {
             composable(route) {
                 // TODO: Open login screen
@@ -67,11 +89,6 @@ fun OCGNavGraph(
         with(OCGRoute.Registration) {
             composable(route) {
                 // TODO: Open registration screen
-            }
-        }
-        with(OCGRoute.Home) {
-            composable(route) {
-                // TODO: Open home screen
             }
         }
         with(OCGRoute.Search) {

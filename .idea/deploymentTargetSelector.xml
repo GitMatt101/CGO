@@ -16,7 +16,7 @@
       <SelectionState runConfigName="DatabaseTest">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="checkDb()">
+      <SelectionState runConfigName="EventTest">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>
