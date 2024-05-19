@@ -4,6 +4,9 @@ import androidx.room.Room
 import com.example.cgo.data.database.CGODatabase
 import com.example.cgo.data.repositories.EventsRepository
 import com.example.cgo.data.repositories.UsersRepository
+import com.example.cgo.ui.controllers.UsersViewModel
+import com.example.cgo.ui.screens.login.LoginViewModel
+import com.example.cgo.ui.screens.registration.RegistrationViewModel
 import com.example.cgo.ui.controllers.EventsViewModel
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
@@ -14,7 +17,7 @@ val appModule = module {
             get(),
             CGODatabase::class.java,
             "cgo"
-        ).build()
+        ).fallbackToDestructiveMigration().build()
     }
 
     single {
@@ -30,5 +33,9 @@ val appModule = module {
         )
     }
 
+    viewModel { RegistrationViewModel() }
+    viewModel { LoginViewModel() }
+
+    viewModel { UsersViewModel(get()) }
     viewModel { EventsViewModel(get()) }
 }

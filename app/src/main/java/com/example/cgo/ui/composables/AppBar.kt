@@ -16,11 +16,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.navigation.NavHostController
 import com.example.cgo.ui.OCGRoute
+import com.example.cgo.utils.PreferencesManager
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -57,17 +60,23 @@ fun AppBar(
             containerColor = MaterialTheme.colorScheme.primaryContainer
         )
     )
-    if (currentRoute.route == OCGRoute.Login.route) {
+    if (currentRoute.route == OCGRoute.Home.route) {
         Column(
-            modifier = Modifier.fillMaxWidth().fillMaxHeight(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight(),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            val context = LocalContext.current
+            val preferencesManager = remember { PreferencesManager(context) }
             Button(onClick = {
+                preferencesManager.clearPreferences()
                 navController.popBackStack()
-                navController.navigate(OCGRoute.Home.route)
-            })
-            { Text("Login") }
+                navController.navigate(OCGRoute.Login.route)
+            }) {
+                Text("Logout")
+            }
         }
     }
 }

@@ -13,6 +13,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.cgo.ui.OCGNavGraph
@@ -43,21 +44,23 @@ class MainActivity : ComponentActivity() {
 
                     if (currentRoute.route != OCGRoute.Login.route && currentRoute.route != OCGRoute.Registration.route) {
                         Scaffold(
+                            modifier = Modifier.padding(0.dp),
                             topBar = { AppBar(navController, currentRoute) },
                             bottomBar = { MenuBar(navController) }
                         ) { contentPadding ->
                             OCGNavGraph(
                                 navController,
-                                modifier =  Modifier.padding(contentPadding)
+                                modifier = Modifier.padding(contentPadding)
                             )
                         }
                     } else {
                         Scaffold(
+                            modifier = Modifier.padding(0.dp),
                             topBar = { AppBar(navController, currentRoute) }
                         ) { contentPadding ->
                             OCGNavGraph(
                                 navController,
-                                modifier =  Modifier.padding(contentPadding)
+                                modifier = Modifier.padding(contentPadding)
                             )
                         }
                     }

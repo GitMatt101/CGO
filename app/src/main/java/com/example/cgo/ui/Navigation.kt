@@ -2,7 +2,9 @@ package com.example.cgo.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.compose.NavHost
@@ -10,9 +12,17 @@ import androidx.navigation.compose.composable
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
+import com.example.cgo.ui.controllers.UsersViewModel
+import com.example.cgo.ui.screens.login.LoginScreen
+import com.example.cgo.ui.screens.login.LoginViewModel
+import com.example.cgo.ui.screens.registration.RegistrationScreen
+import com.example.cgo.ui.screens.registration.RegistrationViewModel
+import com.example.cgo.utils.PreferencesManager
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import org.koin.androidx.compose.koinViewModel
 import com.example.cgo.ui.controllers.EventsViewModel
 import com.example.cgo.ui.screens.home.HomeScreen
-import org.koin.androidx.compose.koinViewModel
+
 sealed class OCGRoute(
     val route: String,
     val title: String,
@@ -62,12 +72,15 @@ sealed class OCGRoute(
     }
 }
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @Composable
 fun OCGNavGraph(
     navController: NavHostController,
     modifier: Modifier = Modifier
 ) {
-    // TODO: Add koinViewModel and state
+    val usersViewModel = koinViewModel<UsersViewModel>()
+    val context = LocalContext.current
+    val preferencesManager = remember { PreferencesManager(context) }
     val eventsVm = koinViewModel<EventsViewModel>()
     val eventsState by eventsVm.state.collectAsStateWithLifecycle()
 
@@ -83,12 +96,48 @@ fun OCGNavGraph(
         }
         with(OCGRoute.Login) {
             composable(route) {
-                // TODO: Open login screen
+                val loginViewModel = koinViewModel<LoginViewModel>()
+                val state by loginViewModel.state.collectAsStateWithLifecycle()
+                if (preferencesManager.containsKey("email") && preferencesManager.containsKey("password")) {
+                    navController.popBackStack()
+                    navController.navigate(OCGRoute.Home.route)
+                } else {
+                    LoginScreen(
+                        state = state,
+                        actions = loginViewModel.actions,
+                        onLogin = { email: String, password: String ->
+                            val result = usersViewModel.checkUserExists(email, password)
+                            result.invokeOnCompletion {
+                                try {
+                                    if (it == null && result.getCompleted()) {
+                                        preferencesManager.saveData("email", state.email)
+                                        preferencesManager.saveData("password", state.password)
+                                        navController.navigate(OCGRoute.Home.route)
+                                        navController.popBackStack()
+                                    }
+                                } catch (_: IllegalStateException) {}
+                            }
+                        },
+                        navController = navController
+                    )
+                }
             }
         }
         with(OCGRoute.Registration) {
             composable(route) {
-                // TODO: Open registration screen
+                val registrationViewModel = koinViewModel<RegistrationViewModel>()
+                val state by registrationViewModel.state.collectAsStateWithLifecycle()
+                RegistrationScreen(
+                    state = state,
+                    actions = registrationViewModel.actions,
+                    onSubmit = {
+                        usersViewModel.addUser(state.createUser())
+                        preferencesManager.saveData("email", state.email)
+                        preferencesManager.saveData("password", state.password)
+                        navController.navigate(OCGRoute.Home.route)
+                        navController.popBackStack()
+                    }
+                )
             }
         }
         with(OCGRoute.Search) {
