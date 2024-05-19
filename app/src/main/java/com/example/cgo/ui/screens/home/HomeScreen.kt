@@ -47,7 +47,7 @@ fun HomeScreen(
                 items(state.events) { event ->
                     EventItem(
                         event,
-                        onClick = { navController.navigate(OCGRoute.AddEvent.route) }
+                        onClick = { navController.navigate(OCGRoute.EventDetails.route) }
                     )
                 }
             }
@@ -59,13 +59,20 @@ fun HomeScreen(
 
 @Composable
 fun EventItem(event: Event, onClick: () -> Unit) {
+    // TODO: Migliorare la disposizione delle informazioni
     ListItem(
         modifier = Modifier.clickable(onClick = onClick),
         headlineContent = { Text(text = event.title) },
+        supportingContent = {
+            Column {
+                Text(text = "Dove: " + event.location)
+                Text(text = "Quando: " + event.date)
+            }
+        },
         trailingContent = {
             Column {
-                Text(text = event.date)
-                Text(text = event.location)
+                Text(text = "Ore: " + event.time)
+                Text(text = "Posti: " + event.maxParticipants)
             }
         },
     )

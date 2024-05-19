@@ -5,6 +5,7 @@ import com.example.cgo.data.database.CGODatabase
 import com.example.cgo.data.repositories.EventsRepository
 import com.example.cgo.data.repositories.UsersRepository
 import com.example.cgo.ui.controllers.EventsViewModel
+import com.example.cgo.ui.screens.addevent.AddEventViewModel
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
@@ -31,4 +32,6 @@ val appModule = module {
     }
 
     viewModel { EventsViewModel(get()) }
+
+    viewModel { AddEventViewModel() }
 }
