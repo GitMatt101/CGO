@@ -21,7 +21,10 @@ import com.example.cgo.utils.PreferencesManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.koin.androidx.compose.koinViewModel
 import com.example.cgo.ui.controllers.EventsViewModel
+import com.example.cgo.ui.screens.addevent.AddEventScreen
+import com.example.cgo.ui.screens.addevent.AddEventViewModel
 import com.example.cgo.ui.screens.home.HomeScreen
+import org.koin.androidx.compose.koinViewModel
 
 sealed class OCGRoute(
     val route: String,
@@ -78,8 +81,8 @@ fun OCGNavGraph(
     navController: NavHostController,
     modifier: Modifier = Modifier
 ) {
-    val usersViewModel = koinViewModel<UsersViewModel>()
     val context = LocalContext.current
+    val usersViewModel = koinViewModel<UsersViewModel>()
     val preferencesManager = remember { PreferencesManager(context) }
     val eventsVm = koinViewModel<EventsViewModel>()
     val eventsState by eventsVm.state.collectAsStateWithLifecycle()
@@ -91,7 +94,10 @@ fun OCGNavGraph(
     ) {
         with(OCGRoute.Home) {
             composable(route) {
-                HomeScreen(eventsState, navController)
+                HomeScreen(
+                    eventsState,
+                    navController
+                )
             }
         }
         with(OCGRoute.Login) {
@@ -147,7 +153,14 @@ fun OCGNavGraph(
         }
         with(OCGRoute.AddEvent) {
             composable(route) {
-                // TODO: Open add event screen
+                val addEventVm = koinViewModel<AddEventViewModel>()
+                val state by addEventVm.state.collectAsStateWithLifecycle()
+                AddEventScreen(
+                    state,
+                    addEventVm.actions,
+                    { eventsVm.addEvent(state.toEvent()) },
+                    navController
+                )
             }
         }
         with(OCGRoute.Rankings) {

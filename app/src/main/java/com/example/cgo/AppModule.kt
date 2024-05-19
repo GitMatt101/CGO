@@ -8,6 +8,7 @@ import com.example.cgo.ui.controllers.UsersViewModel
 import com.example.cgo.ui.screens.login.LoginViewModel
 import com.example.cgo.ui.screens.registration.RegistrationViewModel
 import com.example.cgo.ui.controllers.EventsViewModel
+import com.example.cgo.ui.screens.addevent.AddEventViewModel
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
@@ -38,4 +39,6 @@ val appModule = module {
 
     viewModel { UsersViewModel(get()) }
     viewModel { EventsViewModel(get()) }
+
+    viewModel { AddEventViewModel() }
 }
