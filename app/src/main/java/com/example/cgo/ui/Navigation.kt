@@ -2,7 +2,9 @@ package com.example.cgo.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.compose.NavHost
@@ -11,8 +13,12 @@ import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import com.example.cgo.ui.controllers.UsersViewModel
+import com.example.cgo.ui.screens.login.LoginScreen
+import com.example.cgo.ui.screens.login.LoginViewModel
 import com.example.cgo.ui.screens.registration.RegistrationScreen
 import com.example.cgo.ui.screens.registration.RegistrationViewModel
+import com.example.cgo.utils.PreferencesManager
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.koin.androidx.compose.koinViewModel
 
 sealed class OCGRoute(
@@ -53,13 +59,15 @@ sealed class OCGRoute(
     }
 }
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @Composable
 fun OCGNavGraph(
     navController: NavHostController,
     modifier: Modifier = Modifier
 ) {
     val usersViewModel = koinViewModel<UsersViewModel>()
-    val usersState by usersViewModel.state.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val preferencesManager = remember { PreferencesManager(context) }
 
     NavHost(
         navController = navController,
@@ -68,7 +76,31 @@ fun OCGNavGraph(
     ) {
         with(OCGRoute.Login) {
             composable(route) {
-                // TODO: Open login screen
+                val loginViewModel = koinViewModel<LoginViewModel>()
+                val state by loginViewModel.state.collectAsStateWithLifecycle()
+                if (preferencesManager.containsKey("email") && preferencesManager.containsKey("password")) {
+                    navController.popBackStack()
+                    navController.navigate(OCGRoute.Home.route)
+                } else {
+                    LoginScreen(
+                        state = state,
+                        actions = loginViewModel.actions,
+                        onLogin = { email: String, password: String ->
+                            val result = usersViewModel.checkUserExists(email, password)
+                            result.invokeOnCompletion {
+                                try {
+                                    if (it == null && result.getCompleted()) {
+                                        preferencesManager.saveData("email", state.email)
+                                        preferencesManager.saveData("password", state.password)
+                                        navController.navigate(OCGRoute.Home.route)
+                                        navController.popBackStack()
+                                    }
+                                } catch (_: IllegalStateException) {}
+                            }
+                        },
+                        navController = navController
+                    )
+                }
             }
         }
         with(OCGRoute.Registration) {
@@ -78,8 +110,13 @@ fun OCGNavGraph(
                 RegistrationScreen(
                     state = state,
                     actions = registrationViewModel.actions,
-                    onSubmit = { /*TODO: add user view model*/ },
-                    navController = navController
+                    onSubmit = {
+                        usersViewModel.addUser(state.createUser())
+                        preferencesManager.saveData("email", state.email)
+                        preferencesManager.saveData("password", state.password)
+                        navController.navigate(OCGRoute.Home.route)
+                        navController.popBackStack()
+                    }
                 )
             }
         }

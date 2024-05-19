@@ -1,6 +1,7 @@
 package com.example.cgo.ui.screens.registration
 
 import android.Manifest
+import android.net.Uri
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -9,11 +10,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -29,12 +32,13 @@ import com.example.cgo.ui.composables.Size
 import com.example.cgo.utils.rememberCameraLauncher
 import com.example.cgo.utils.rememberPermission
 
+val PADDING = 10.dp
+
 @Composable
 fun RegistrationScreen(
     state: RegistrationState,
     actions: RegistrationActions,
-    onSubmit: () -> Unit,
-    navController: NavHostController
+    onSubmit: () -> Unit
 ) {
     val context = LocalContext.current
 
@@ -54,67 +58,67 @@ fun RegistrationScreen(
     }
 
     // UI
-    Scaffold { contentPadding ->
-        Column (
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .padding(contentPadding)
-                .padding(12.dp)
-                .fillMaxSize()
+    Column (
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+    ) {
+        OutlinedTextField(
+            value = state.username,
+            onValueChange = actions::setUsername,
+            label = { Text("Username") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        OutlinedTextField(
+            value = state.email,
+            onValueChange = actions::setEmail,
+            label = { Text("Email") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        OutlinedTextField(
+            value = state.password,
+            onValueChange = actions::setPassword,
+            label = { Text("Password") },
+            modifier = Modifier.fillMaxWidth(),
+            visualTransformation =  PasswordVisualTransformation()
+        )
+        OutlinedTextField(
+            value = state.confirmPassword,
+            onValueChange = actions::setConfirmPassword,
+            label = { Text("Confirm Password") },
+            modifier = Modifier.fillMaxWidth(),
+            visualTransformation =  PasswordVisualTransformation()
+        )
+        Spacer(Modifier.size(PADDING))
+        Button(
+            onClick = ::takePicture,
+            contentPadding = ButtonDefaults.ButtonWithIconContentPadding,
         ) {
-            OutlinedTextField(
-                value = state.username,
-                onValueChange = actions::setUsername,
-                label = { Text("Username") },
-                modifier = Modifier.fillMaxWidth()
+            Icon(
+                painterResource(id = R.drawable.camera),
+                contentDescription = "Camera icon",
+                modifier = Modifier.size(ButtonDefaults.IconSize)
             )
-            OutlinedTextField(
-                value = state.email,
-                onValueChange = actions::setEmail,
-                label = { Text("Email") },
-                modifier = Modifier.fillMaxWidth()
-            )
-            OutlinedTextField(
-                value = state.password,
-                onValueChange = actions::setPassword,
-                label = { Text("Password") },
-                modifier = Modifier.fillMaxWidth(),
-                visualTransformation =  PasswordVisualTransformation()
-            )
-            OutlinedTextField(
-                value = state.confirmPassword,
-                onValueChange = actions::setConfirmPassword,
-                label = { Text("Confirm Password") },
-                modifier = Modifier.fillMaxWidth(),
-                visualTransformation =  PasswordVisualTransformation()
-            )
-            Spacer(Modifier.size(24.dp))
-            Button(
-                onClick = ::takePicture,
-                contentPadding = ButtonDefaults.ButtonWithIconContentPadding,
-            ) {
-                Icon(
-                    painterResource(id = R.drawable.camera),
-                    contentDescription = "Camera icon",
-                    modifier = Modifier.size(ButtonDefaults.IconSize)
-                )
-                Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-                Text("Take a picture")
-            }
-            Spacer(Modifier.size(8.dp))
+            Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+            Text("Take a picture")
+        }
+        if (state.profilePicture != Uri.EMPTY) {
+            Spacer(Modifier.size(PADDING))
             ImageWithPlaceholder(uri = state.profilePicture, size = Size.Large)
-            Spacer(Modifier.size(8.dp))
-            Button(
-                modifier = Modifier.fillMaxWidth(0.5f),
-                onClick = {
-                    if (!state.canSubmit) return@Button
-                    onSubmit()
-                    navController.navigateUp()
-                }
-            ) {
-                Text(text = "Submit")
+        }
+        Spacer(modifier = Modifier.weight(1.0f))
+        Divider()
+        Button(
+            modifier = Modifier.padding(bottom = PADDING),
+            onClick = {
+                if (!state.canSubmit)
+                    return@Button
+                onSubmit()
             }
+        ) {
+            Text(text = "Submit")
         }
     }
 }
