@@ -20,6 +20,8 @@ import com.example.cgo.ui.screens.registration.RegistrationViewModel
 import com.example.cgo.utils.PreferencesManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.koin.androidx.compose.koinViewModel
+import com.example.cgo.ui.controllers.EventsViewModel
+import com.example.cgo.ui.screens.home.HomeScreen
 
 sealed class OCGRoute(
     val route: String,
@@ -55,7 +57,18 @@ sealed class OCGRoute(
     }
 
     companion object {
-        val routes = setOf(Login, Registration, Home, Search, AddEvent, Rankings, Profile, Settings, EventsMap, EventDetails)
+        val routes = setOf(
+            Login,
+            Registration,
+            Home,
+            Search,
+            AddEvent,
+            Rankings,
+            Profile,
+            Settings,
+            EventsMap,
+            EventDetails
+        )
     }
 }
 
@@ -68,12 +81,19 @@ fun OCGNavGraph(
     val usersViewModel = koinViewModel<UsersViewModel>()
     val context = LocalContext.current
     val preferencesManager = remember { PreferencesManager(context) }
+    val eventsVm = koinViewModel<EventsViewModel>()
+    val eventsState by eventsVm.state.collectAsStateWithLifecycle()
 
     NavHost(
         navController = navController,
         startDestination = OCGRoute.Login.route,
         modifier = modifier
     ) {
+        with(OCGRoute.Home) {
+            composable(route) {
+                HomeScreen(eventsState, navController)
+            }
+        }
         with(OCGRoute.Login) {
             composable(route) {
                 val loginViewModel = koinViewModel<LoginViewModel>()
@@ -118,11 +138,6 @@ fun OCGNavGraph(
                         navController.popBackStack()
                     }
                 )
-            }
-        }
-        with(OCGRoute.Home) {
-            composable(route) {
-                // TODO: Open home screen
             }
         }
         with(OCGRoute.Search) {

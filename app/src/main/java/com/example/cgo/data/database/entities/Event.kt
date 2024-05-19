@@ -3,7 +3,6 @@ package com.example.cgo.data.database.entities
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import java.util.Date
 
 enum class PrivacyType {
     PUBLIC,
@@ -24,6 +23,9 @@ data class Event(
 
     @ColumnInfo
     val date: String,
+
+    @ColumnInfo
+    val time: String,
 
     @ColumnInfo
     val location: String,
