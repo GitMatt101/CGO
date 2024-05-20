@@ -1,7 +1,9 @@
 package com.example.cgo.ui
 
+import android.net.Uri
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -12,6 +14,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
+import com.example.cgo.data.database.entities.User
 import com.example.cgo.ui.controllers.UsersViewModel
 import com.example.cgo.ui.screens.login.LoginScreen
 import com.example.cgo.ui.screens.login.LoginViewModel
@@ -24,7 +27,8 @@ import com.example.cgo.ui.controllers.EventsViewModel
 import com.example.cgo.ui.screens.addevent.AddEventScreen
 import com.example.cgo.ui.screens.addevent.AddEventViewModel
 import com.example.cgo.ui.screens.home.HomeScreen
-import org.koin.androidx.compose.koinViewModel
+import com.example.cgo.ui.screens.profile.ProfileScreen
+import kotlinx.coroutines.Deferred
 
 sealed class OCGRoute(
     val route: String,
@@ -41,11 +45,11 @@ sealed class OCGRoute(
     data object AddEvent : OCGRoute("add", "Create Event")
     data object Rankings : OCGRoute("rankings", "Rankings")
     data object Profile : OCGRoute(
-        "profile/{profileID}",
+        "profile/{email}",
         "Profile",
-        listOf(navArgument("profileID") { type = NavType.IntType })
+        listOf(navArgument("email") { type = NavType.StringType })
     ) {
-        fun buildRoute(profileID: Int) = "profile/$profileID"
+        fun buildRoute(email: String) = "profile/$email"
     }
 
     // Other routes
@@ -56,7 +60,7 @@ sealed class OCGRoute(
         "Event Details",
         listOf(navArgument("eventID") { type = NavType.IntType })
     ) {
-        fun buildRoute(eventID: String) = "events/$eventID"
+        fun buildRoute(eventID: Int) = "events/$eventID"
     }
 
     companion object {
@@ -75,17 +79,15 @@ sealed class OCGRoute(
     }
 }
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @Composable
 fun OCGNavGraph(
     navController: NavHostController,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
-    val usersViewModel = koinViewModel<UsersViewModel>()
     val preferencesManager = remember { PreferencesManager(context) }
+    val usersViewModel = koinViewModel<UsersViewModel>()
     val eventsVm = koinViewModel<EventsViewModel>()
-    val eventsState by eventsVm.state.collectAsStateWithLifecycle()
 
     NavHost(
         navController = navController,
@@ -94,6 +96,7 @@ fun OCGNavGraph(
     ) {
         with(OCGRoute.Home) {
             composable(route) {
+                val eventsState by eventsVm.state.collectAsStateWithLifecycle()
                 HomeScreen(
                     eventsState,
                     navController
@@ -104,7 +107,7 @@ fun OCGNavGraph(
             composable(route) {
                 val loginViewModel = koinViewModel<LoginViewModel>()
                 val state by loginViewModel.state.collectAsStateWithLifecycle()
-                if (preferencesManager.containsKey("email") && preferencesManager.containsKey("password")) {
+                if (checkLogin(preferencesManager)) {
                     navController.popBackStack()
                     navController.navigate(OCGRoute.Home.route)
                 } else {
@@ -112,17 +115,17 @@ fun OCGNavGraph(
                         state = state,
                         actions = loginViewModel.actions,
                         onLogin = { email: String, password: String ->
-                            val result = usersViewModel.checkUserExists(email, password)
-                            result.invokeOnCompletion {
-                                try {
-                                    if (it == null && result.getCompleted()) {
-                                        preferencesManager.saveData("email", state.email)
-                                        preferencesManager.saveData("password", state.password)
-                                        navController.navigate(OCGRoute.Home.route)
-                                        navController.popBackStack()
-                                    }
-                                } catch (_: IllegalStateException) {}
-                            }
+                            onQueryComplete(
+                                usersViewModel.checkLogin(email, password),
+                                onComplete = {
+                                    login(preferencesManager = preferencesManager, email = email, password = password)
+                                    navController.popBackStack(OCGRoute.Login.route, inclusive = true)
+                                    navController.navigate(OCGRoute.Home.route)
+                                },
+                                checkResult = {
+                                    it is Boolean && it == true
+                                }
+                            )
                         },
                         navController = navController
                     )
@@ -138,10 +141,9 @@ fun OCGNavGraph(
                     actions = registrationViewModel.actions,
                     onSubmit = {
                         usersViewModel.addUser(state.createUser())
-                        preferencesManager.saveData("email", state.email)
-                        preferencesManager.saveData("password", state.password)
+                        login(preferencesManager= preferencesManager, email = state.email, password = state.password)
+                        navController.popBackStack(OCGRoute.Registration.route, inclusive = true)
                         navController.navigate(OCGRoute.Home.route)
-                        navController.popBackStack()
                     }
                 )
             }
@@ -169,8 +171,30 @@ fun OCGNavGraph(
             }
         }
         with(OCGRoute.Profile) {
-            composable(route, arguments) {
-                // TODO: Open profile screen
+            composable(route, arguments) {backStackEntry ->
+                // Create temporary user (also useful in case of error while fetching data from Database)
+                val user = remember { mutableStateOf(User(userId = -1, username = "NONE", email = "", password = "", profilePicture = Uri.EMPTY.toString(), gamesWon = 0)) }
+                // Variable used to check if the coroutine is finished
+                val isCoroutineFinished = remember { mutableStateOf(false) }
+
+                if (checkLogin(preferencesManager)) {
+                    onQueryComplete(
+                        usersViewModel.getUserInfo(backStackEntry.arguments?.getString("email").toString()),
+                        onComplete = {result: Any ->
+                            user.value = result as User
+                            isCoroutineFinished.value = true
+                        },
+                        checkResult = {result: Any ->
+                            result is User
+                        }
+                    )
+                }
+                if (isCoroutineFinished.value) {
+                    // TODO: fetch events from database
+                    val eventsState by eventsVm.state.collectAsStateWithLifecycle()
+                    val events = eventsState.events
+                    ProfileScreen(user = user.value, events = events, navController = navController)
+                }
             }
         }
         with(OCGRoute.EventDetails) {
@@ -182,6 +206,25 @@ fun OCGNavGraph(
             composable(route) {
                 // TODO: Open settings screen
             }
+        }
+    }
+}
+
+fun checkLogin(preferencesManager: PreferencesManager) : Boolean {
+    return preferencesManager.containsKey("email") && preferencesManager.containsKey("password")
+}
+
+fun login(preferencesManager: PreferencesManager, email: String, password: String) {
+    preferencesManager.saveData("email", email)
+    preferencesManager.saveData("password", password)
+}
+
+@OptIn(ExperimentalCoroutinesApi::class)
+fun onQueryComplete(result: Deferred<Any>, onComplete: (Any) -> Unit, checkResult: (Any) -> Boolean) {
+    result.invokeOnCompletion {
+        if (it == null) {
+            if (checkResult(result.getCompleted()))
+                onComplete(result.getCompleted())
         }
     }
 }

@@ -18,7 +18,9 @@ class UsersRepository(
 
     suspend fun delete(user: User) = userDAO.delete(user)
 
-    suspend fun checkUserExists(email: String, password: String) : Boolean = users.first().filter { it.email == email && it.password == password }.size == 1
+    suspend fun checkLogin(email: String, password: String) : Boolean = users.first().filter { it.email == email && it.password == password }.size == 1
+
+    suspend fun getUserInfo(email: String) : User = users.first().first { it.email == email }
 
     suspend fun getUserWithEvents() = userDAO.getUserWithEvents()
 }
