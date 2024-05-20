@@ -1,13 +1,8 @@
 package com.example.cgo.ui.composables
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -17,11 +12,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.navigation.NavHostController
+import com.example.cgo.R
 import com.example.cgo.ui.OCGRoute
 import com.example.cgo.utils.PreferencesManager
 
@@ -53,6 +48,17 @@ fun AppBar(
             if (currentRoute.route == OCGRoute.Profile.route) {
                 IconButton(onClick = { navController.navigate(OCGRoute.Settings.route) }) {
                     Icon(Icons.Outlined.Settings, "Settings")
+                }
+            }
+            if (currentRoute.route == OCGRoute.Settings.route) {
+                val context = LocalContext.current
+                val preferencesManager = remember { PreferencesManager(context) }
+                IconButton(onClick = {
+                    preferencesManager.clearPreferences()
+                    navController.popBackStack(OCGRoute.Profile.route, inclusive = true)
+                    navController.navigate(OCGRoute.Login.route)
+                }) {
+                    Icon(painterResource(id = R.drawable.logout), "Logout")
                 }
             }
         },

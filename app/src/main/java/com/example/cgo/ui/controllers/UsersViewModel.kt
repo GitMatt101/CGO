@@ -26,5 +26,7 @@ class UsersViewModel(private val repository: UsersRepository) : ViewModel() {
 
     fun deleteUser(user: User) = viewModelScope.launch { repository.delete(user) }
 
-    fun checkUserExists(email: String, password: String) : Deferred<Boolean> = viewModelScope.async { repository.checkUserExists(email, password) }
+    fun checkLogin(email: String, password: String) : Deferred<Boolean> = viewModelScope.async { repository.checkLogin(email, password) }
+
+    fun getUserInfo(email: String) : Deferred<User> = viewModelScope.async { repository.getUserInfo(email) }
 }
