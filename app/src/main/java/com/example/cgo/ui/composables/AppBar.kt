@@ -60,23 +60,4 @@ fun AppBar(
             containerColor = MaterialTheme.colorScheme.primaryContainer
         )
     )
-    if (currentRoute.route == OCGRoute.Home.route) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .fillMaxHeight(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            val context = LocalContext.current
-            val preferencesManager = remember { PreferencesManager(context) }
-            Button(onClick = {
-                preferencesManager.clearPreferences()
-                navController.popBackStack()
-                navController.navigate(OCGRoute.Login.route)
-            }) {
-                Text("Logout")
-            }
-        }
-    }
 }
