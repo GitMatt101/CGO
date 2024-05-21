@@ -28,6 +28,9 @@ import com.example.cgo.ui.screens.addevent.AddEventScreen
 import com.example.cgo.ui.screens.addevent.AddEventViewModel
 import com.example.cgo.ui.screens.home.HomeScreen
 import com.example.cgo.ui.screens.profile.ProfileScreen
+import com.example.cgo.ui.screens.settings.SettingsScreen
+import com.example.cgo.ui.screens.settings.SettingsViewModel
+import com.example.cgo.ui.theme.Theme
 import kotlinx.coroutines.Deferred
 
 sealed class OCGRoute(
@@ -204,7 +207,12 @@ fun OCGNavGraph(
         }
         with(OCGRoute.Settings) {
             composable(route) {
-                // TODO: Open settings screen
+                val settingsViewModel = koinViewModel<SettingsViewModel>()
+                val state by settingsViewModel.state.collectAsStateWithLifecycle()
+                SettingsScreen(
+                    state = state,
+                    changeTheme = settingsViewModel::changeTheme
+                )
             }
         }
     }
