@@ -1,8 +1,10 @@
 package com.example.cgo.ui.screens.settings
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenuItem
@@ -77,6 +79,7 @@ fun DropDown(
                 }
             }
         }
+        Spacer(Modifier.size(10.dp))
         Button(onClick = { navController.navigate(OCGRoute.EditProfile.route) }) {
             Text(text = "Edit Profile")
         }
