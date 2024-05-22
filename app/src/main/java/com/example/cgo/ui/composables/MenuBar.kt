@@ -9,16 +9,17 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.example.cgo.R
 import com.example.cgo.ui.OCGRoute
-import com.example.cgo.utils.PreferencesManager
+import com.example.cgo.ui.controllers.AppViewModel
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun MenuBar(navController: NavHostController) {
@@ -61,11 +62,11 @@ fun MenuBar(navController: NavHostController) {
             }
 
             Spacer(modifier = Modifier.weight(1.0f, true))
-            val context = LocalContext.current
-            val preferencesManager = remember { PreferencesManager(context) }
+            val appViewModel = koinViewModel<AppViewModel>()
+            val appState by appViewModel.state.collectAsStateWithLifecycle()
             IconButton(onClick = {
                 navController.popBackStack()
-                navController.navigate(OCGRoute.Profile.buildRoute(preferencesManager.getData("email", "")))
+                navController.navigate(OCGRoute.Profile.buildRoute(appState.userId))
             }) {
                 MenuIcon(painterResource(id = R.drawable.profile), "Profile", 80)
             }

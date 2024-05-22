@@ -12,7 +12,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -22,7 +21,7 @@ import com.example.cgo.ui.OCGNavGraph
 import com.example.cgo.ui.OCGRoute
 import com.example.cgo.ui.composables.AppBar
 import com.example.cgo.ui.composables.MenuBar
-import com.example.cgo.ui.screens.settings.SettingsViewModel
+import com.example.cgo.ui.controllers.AppViewModel
 import com.example.cgo.ui.theme.CGOTheme
 import com.example.cgo.ui.theme.Theme
 import org.koin.androidx.compose.koinViewModel
@@ -32,7 +31,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            val settingsViewModel = koinViewModel<SettingsViewModel>()
+            val settingsViewModel = koinViewModel<AppViewModel>()
             val state by settingsViewModel.state.collectAsStateWithLifecycle()
 
             CGOTheme (

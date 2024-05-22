@@ -5,14 +5,14 @@ import androidx.datastore.preferences.preferencesDataStore
 import androidx.room.Room
 import com.example.cgo.data.database.CGODatabase
 import com.example.cgo.data.repositories.EventsRepository
-import com.example.cgo.data.repositories.SettingsRepository
+import com.example.cgo.data.repositories.AppRepository
 import com.example.cgo.data.repositories.UsersRepository
+import com.example.cgo.ui.controllers.AppViewModel
 import com.example.cgo.ui.controllers.UsersViewModel
 import com.example.cgo.ui.screens.login.LoginViewModel
 import com.example.cgo.ui.screens.registration.RegistrationViewModel
 import com.example.cgo.ui.controllers.EventsViewModel
 import com.example.cgo.ui.screens.addevent.AddEventViewModel
-import com.example.cgo.ui.screens.settings.SettingsViewModel
 import com.example.cgo.ui.screens.settings.changeprofile.EditProfileViewModel
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
@@ -21,7 +21,7 @@ val Context.datastore by preferencesDataStore("settings")
 
 val appModule = module {
     single { get<Context>().datastore }
-    single { SettingsRepository(get()) }
+    single { AppRepository(get()) }
 
     single {
         Room.databaseBuilder(
@@ -48,7 +48,7 @@ val appModule = module {
     viewModel { RegistrationViewModel() }
     viewModel { LoginViewModel() }
     viewModel { AddEventViewModel() }
-    viewModel { SettingsViewModel(get()) }
+    viewModel { AppViewModel(get()) }
     viewModel { EditProfileViewModel() }
 
     // Database entities view models
