@@ -7,8 +7,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavBackStackEntry
@@ -18,12 +16,12 @@ import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import com.example.cgo.data.database.entities.User
+import com.example.cgo.ui.controllers.AppViewModel
 import com.example.cgo.ui.controllers.UsersViewModel
 import com.example.cgo.ui.screens.login.LoginScreen
 import com.example.cgo.ui.screens.login.LoginViewModel
 import com.example.cgo.ui.screens.registration.RegistrationScreen
 import com.example.cgo.ui.screens.registration.RegistrationViewModel
-import com.example.cgo.utils.PreferencesManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.koin.androidx.compose.koinViewModel
 import com.example.cgo.ui.controllers.EventsViewModel
@@ -32,10 +30,8 @@ import com.example.cgo.ui.screens.addevent.AddEventViewModel
 import com.example.cgo.ui.screens.home.HomeScreen
 import com.example.cgo.ui.screens.profile.ProfileScreen
 import com.example.cgo.ui.screens.settings.SettingsScreen
-import com.example.cgo.ui.screens.settings.SettingsViewModel
 import com.example.cgo.ui.screens.settings.changeprofile.EditProfileScreen
 import com.example.cgo.ui.screens.settings.changeprofile.EditProfileViewModel
-import com.example.cgo.ui.theme.Theme
 import kotlinx.coroutines.Deferred
 
 sealed class OCGRoute(
@@ -53,11 +49,11 @@ sealed class OCGRoute(
     data object AddEvent : OCGRoute("add", "Create Event")
     data object Rankings : OCGRoute("rankings", "Rankings")
     data object Profile : OCGRoute(
-        "profile/{email}",
+        "profile/{userId}",
         "Profile",
-        listOf(navArgument("email") { type = NavType.StringType })
+        listOf(navArgument("userId") { type = NavType.IntType })
     ) {
-        fun buildRoute(email: String) = "profile/$email"
+        fun buildRoute(userId: Int) = "profile/$userId"
     }
 
     // Other routes
@@ -94,10 +90,10 @@ fun OCGNavGraph(
     navController: NavHostController,
     modifier: Modifier = Modifier
 ) {
-    val context = LocalContext.current
-    val preferencesManager = remember { PreferencesManager(context) }
     val usersViewModel = koinViewModel<UsersViewModel>()
     val eventsVm = koinViewModel<EventsViewModel>()
+    val appViewModel = koinViewModel<AppViewModel>()
+    val appState by appViewModel.state.collectAsStateWithLifecycle()
 
     NavHost(
         navController = navController,
@@ -117,7 +113,7 @@ fun OCGNavGraph(
             composable(route) {
                 val loginViewModel = koinViewModel<LoginViewModel>()
                 val state by loginViewModel.state.collectAsStateWithLifecycle()
-                if (checkLogin(preferencesManager)) {
+                if (appState.userId != -1) {
                     navController.popBackStack()
                     navController.navigate(OCGRoute.Home.route)
                 } else {
@@ -126,14 +122,17 @@ fun OCGNavGraph(
                         actions = loginViewModel.actions,
                         onLogin = { email: String, password: String ->
                             onQueryComplete(
-                                usersViewModel.checkLogin(email, password),
-                                onComplete = {
-                                    login(preferencesManager = preferencesManager, email = email, password = password)
-                                    navController.popBackStack(OCGRoute.Login.route, inclusive = true)
-                                    navController.navigate(OCGRoute.Home.route)
+                                usersViewModel.getUserOnLogin(email = email, password = password),
+                                onComplete = {result: Any ->
+                                    appViewModel.changeUserId((result as User).userId).invokeOnCompletion {
+                                        if (it == null) {
+                                            navController.popBackStack(OCGRoute.Login.route, inclusive = true)
+                                            navController.navigate(OCGRoute.Home.route)
+                                        }
+                                    }
                                 },
                                 checkResult = {
-                                    it is Boolean && it == true
+                                    it is User && it.userId != -1
                                 }
                             )
                         },
@@ -151,9 +150,20 @@ fun OCGNavGraph(
                     actions = registrationViewModel.actions,
                     onSubmit = {
                         usersViewModel.addUser(state.createUser())
-                        login(preferencesManager= preferencesManager, email = state.email, password = state.password)
-                        navController.popBackStack(OCGRoute.Registration.route, inclusive = true)
-                        navController.navigate(OCGRoute.Home.route)
+                        onQueryComplete(
+                            usersViewModel.getUserOnLogin(email = state.email, password = state.password),
+                            onComplete = {result: Any ->
+                                appViewModel.changeUserId((result as User).userId).invokeOnCompletion {
+                                    if (it == null) {
+                                        navController.popBackStack(OCGRoute.Login.route, inclusive = true)
+                                        navController.navigate(OCGRoute.Home.route)
+                                    }
+                                }
+                            },
+                            checkResult = {
+                                it is User && it.userId != -1
+                            }
+                        )
                     }
                 )
             }
@@ -183,27 +193,27 @@ fun OCGNavGraph(
         with(OCGRoute.Profile) {
             composable(route, arguments) {backStackEntry: NavBackStackEntry ->
                 // Create temporary user (also useful in case of error while fetching data from Database)
-                val user = remember { mutableStateOf(User(userId = -1, username = "NONE", email = "", password = "", profilePicture = Uri.EMPTY.toString(), gamesWon = 0)) }
+                var user by remember { mutableStateOf(User(userId = -1, username = "NONE", email = "", password = "", profilePicture = Uri.EMPTY.toString(), gamesWon = 0)) }
                 // Variable used to check if the coroutine is finished
                 var isCoroutineFinished by remember { mutableStateOf(false) }
 
-                if (checkLogin(preferencesManager)) {
+                if (backStackEntry.arguments?.getInt("userId") != -1) {
                     onQueryComplete(
-                        usersViewModel.getUserInfo(backStackEntry.arguments?.getString("email").toString()),
+                        usersViewModel.getUserInfo(backStackEntry.arguments?.getInt("userId") ?: -1),
                         onComplete = {result: Any ->
-                            user.value = result as User
+                            user = result as User
                             isCoroutineFinished = true
                         },
                         checkResult = {result: Any ->
-                            result is User
+                            result is User && result.userId != -1
                         }
                     )
-                }
-                if (isCoroutineFinished) {
-                    // TODO: fetch events from database
-                    val eventsState by eventsVm.state.collectAsStateWithLifecycle()
-                    val events = eventsState.events
-                    ProfileScreen(user = user.value, events = events, navController = navController)
+                    if (isCoroutineFinished) {
+                        // TODO: fetch events from database
+                        val eventsState by eventsVm.state.collectAsStateWithLifecycle()
+                        val events = eventsState.events
+                        ProfileScreen(user = user, events = events, navController = navController)
+                    }
                 }
             }
         }
@@ -214,33 +224,31 @@ fun OCGNavGraph(
         }
         with(OCGRoute.Settings) {
             composable(route) {
-                val settingsViewModel = koinViewModel<SettingsViewModel>()
-                val state by settingsViewModel.state.collectAsStateWithLifecycle()
                 SettingsScreen(
-                    state = state,
+                    state = appState,
                     navController = navController,
-                    changeTheme = settingsViewModel::changeTheme
+                    changeTheme = appViewModel::changeTheme
                 )
             }
         }
         with(OCGRoute.EditProfile) {
-            composable(route) {backStackEntry: NavBackStackEntry ->
+            composable(route) {
                 // Create temporary user (also useful in case of error while fetching data from Database)
                 var user by remember { mutableStateOf(User(userId = -1, username = "NONE", email = "", password = "", profilePicture = Uri.EMPTY.toString(), gamesWon = 0)) }
                 // Variable used to check if the coroutine is finished
                 var isCoroutineFinished by remember { mutableStateOf(false) }
 
                 onQueryComplete(
-                    usersViewModel.getUserInfo(preferencesManager.getData("email", "")),
-                    onComplete = {result: Any ->
+                    usersViewModel.getUserInfo(appState.userId),
+                    onComplete = { result: Any ->
                         user = result as User
                         isCoroutineFinished = true
                     },
-                    checkResult = {result: Any ->
-                        result is User
+                    checkResult = { result: Any ->
+                        result is User && result.userId != -1
                     }
                 )
-                if (isCoroutineFinished) {
+                if (appState.userId != -1 && isCoroutineFinished) {
                     val editProfileViewModel = koinViewModel<EditProfileViewModel>()
                     val state by editProfileViewModel.state.collectAsStateWithLifecycle()
                     EditProfileScreen(
@@ -265,15 +273,6 @@ fun OCGNavGraph(
             }
         }
     }
-}
-
-fun checkLogin(preferencesManager: PreferencesManager) : Boolean {
-    return preferencesManager.containsKey("email") && preferencesManager.containsKey("password")
-}
-
-fun login(preferencesManager: PreferencesManager, email: String, password: String) {
-    preferencesManager.saveData("email", email)
-    preferencesManager.saveData("password", password)
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)

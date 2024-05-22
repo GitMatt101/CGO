@@ -23,11 +23,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.cgo.ui.OCGRoute
+import com.example.cgo.ui.controllers.AppState
 import com.example.cgo.ui.theme.Theme
 
 @Composable
 fun SettingsScreen(
-    state: SettingsState,
+    state: AppState,
     navController: NavHostController,
     changeTheme: (Theme) -> Unit
 ) {
@@ -39,7 +40,7 @@ fun SettingsScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DropDown(
-    state: SettingsState,
+    state: AppState,
     navController: NavHostController,
     changeTheme: (Theme) -> Unit
 ) {
