@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -18,15 +19,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
+import com.example.cgo.ui.OCGRoute
 import com.example.cgo.ui.theme.Theme
 
 @Composable
 fun SettingsScreen(
     state: SettingsState,
+    navController: NavHostController,
     changeTheme: (Theme) -> Unit
 ) {
     Column (modifier = Modifier.selectableGroup()) {
-        DropDown(state = state, changeTheme = changeTheme)
+        DropDown(state = state, navController = navController, changeTheme = changeTheme)
     }
 }
 
@@ -34,10 +38,11 @@ fun SettingsScreen(
 @Composable
 fun DropDown(
     state: SettingsState,
+    navController: NavHostController,
     changeTheme: (Theme) -> Unit
 ) {
     var isExpanded by remember { mutableStateOf(false) }
-    
+
     Column (
         modifier = Modifier
             .fillMaxWidth()
@@ -71,6 +76,9 @@ fun DropDown(
                     )
                 }
             }
+        }
+        Button(onClick = { navController.navigate(OCGRoute.EditProfile.route) }) {
+            Text(text = "Edit Profile")
         }
     }
 }

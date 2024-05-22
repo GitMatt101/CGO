@@ -5,10 +5,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NamedNavArgument
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.NavHostController
@@ -30,6 +33,8 @@ import com.example.cgo.ui.screens.home.HomeScreen
 import com.example.cgo.ui.screens.profile.ProfileScreen
 import com.example.cgo.ui.screens.settings.SettingsScreen
 import com.example.cgo.ui.screens.settings.SettingsViewModel
+import com.example.cgo.ui.screens.settings.changeprofile.EditProfileScreen
+import com.example.cgo.ui.screens.settings.changeprofile.EditProfileViewModel
 import com.example.cgo.ui.theme.Theme
 import kotlinx.coroutines.Deferred
 
@@ -57,6 +62,7 @@ sealed class OCGRoute(
 
     // Other routes
     data object Settings : OCGRoute("settings", "Settings")
+    data object EditProfile : OCGRoute("edit-profile", "Edit Profile")
     data object EventsMap : OCGRoute("map", "Events Map")
     data object EventDetails : OCGRoute(
         "events/{eventID}",
@@ -76,6 +82,7 @@ sealed class OCGRoute(
             Rankings,
             Profile,
             Settings,
+            EditProfile,
             EventsMap,
             EventDetails
         )
@@ -174,25 +181,25 @@ fun OCGNavGraph(
             }
         }
         with(OCGRoute.Profile) {
-            composable(route, arguments) {backStackEntry ->
+            composable(route, arguments) {backStackEntry: NavBackStackEntry ->
                 // Create temporary user (also useful in case of error while fetching data from Database)
                 val user = remember { mutableStateOf(User(userId = -1, username = "NONE", email = "", password = "", profilePicture = Uri.EMPTY.toString(), gamesWon = 0)) }
                 // Variable used to check if the coroutine is finished
-                val isCoroutineFinished = remember { mutableStateOf(false) }
+                var isCoroutineFinished by remember { mutableStateOf(false) }
 
                 if (checkLogin(preferencesManager)) {
                     onQueryComplete(
                         usersViewModel.getUserInfo(backStackEntry.arguments?.getString("email").toString()),
                         onComplete = {result: Any ->
                             user.value = result as User
-                            isCoroutineFinished.value = true
+                            isCoroutineFinished = true
                         },
                         checkResult = {result: Any ->
                             result is User
                         }
                     )
                 }
-                if (isCoroutineFinished.value) {
+                if (isCoroutineFinished) {
                     // TODO: fetch events from database
                     val eventsState by eventsVm.state.collectAsStateWithLifecycle()
                     val events = eventsState.events
@@ -211,8 +218,50 @@ fun OCGNavGraph(
                 val state by settingsViewModel.state.collectAsStateWithLifecycle()
                 SettingsScreen(
                     state = state,
+                    navController = navController,
                     changeTheme = settingsViewModel::changeTheme
                 )
+            }
+        }
+        with(OCGRoute.EditProfile) {
+            composable(route) {backStackEntry: NavBackStackEntry ->
+                // Create temporary user (also useful in case of error while fetching data from Database)
+                var user by remember { mutableStateOf(User(userId = -1, username = "NONE", email = "", password = "", profilePicture = Uri.EMPTY.toString(), gamesWon = 0)) }
+                // Variable used to check if the coroutine is finished
+                var isCoroutineFinished by remember { mutableStateOf(false) }
+
+                onQueryComplete(
+                    usersViewModel.getUserInfo(preferencesManager.getData("email", "")),
+                    onComplete = {result: Any ->
+                        user = result as User
+                        isCoroutineFinished = true
+                    },
+                    checkResult = {result: Any ->
+                        result is User
+                    }
+                )
+                if (isCoroutineFinished) {
+                    val editProfileViewModel = koinViewModel<EditProfileViewModel>()
+                    val state by editProfileViewModel.state.collectAsStateWithLifecycle()
+                    EditProfileScreen(
+                        username = user.username,
+                        profilePicture = user.profilePicture,
+                        state = state,
+                        actions = editProfileViewModel.actions,
+                        onSubmit = {newUsername: String, newProfilePicture: Uri ->
+                            val updatedUser = User(
+                                user.userId,
+                                username = newUsername,
+                                email = user.email,
+                                password = user.password,
+                                gamesWon = user.gamesWon,
+                                profilePicture = newProfilePicture.toString()
+                            )
+                            usersViewModel.updateUser(updatedUser)
+                            navController.navigateUp()
+                        }
+                    )
+                }
             }
         }
     }
