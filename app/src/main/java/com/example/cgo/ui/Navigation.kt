@@ -194,7 +194,7 @@ fun OCGNavGraph(
         with(OCGRoute.Profile) {
             composable(route, arguments) {backStackEntry: NavBackStackEntry ->
                 // Create temporary user (also useful in case of error while fetching data from Database)
-                var user by remember { mutableStateOf(User(userId = -1, username = "NONE", email = "", password = "", profilePicture = Uri.EMPTY.toString(), gamesWon = 0)) }
+                var user by remember { mutableStateOf(User(userId = -1, username = "NONE", email = "", password = "", profilePicture = Uri.EMPTY.toString(), gamesWon = 0, participantId = 0)) }
                 // Variable used to check if the coroutine is finished
                 var isCoroutineFinished by remember { mutableStateOf(false) }
 
@@ -237,7 +237,7 @@ fun OCGNavGraph(
         with(OCGRoute.EditProfile) {
             composable(route) {
                 // Create temporary user (also useful in case of error while fetching data from Database)
-                var user by remember { mutableStateOf(User(userId = -1, username = "NONE", email = "", password = "", profilePicture = Uri.EMPTY.toString(), gamesWon = 0)) }
+                var user by remember { mutableStateOf(User(userId = -1, username = "NONE", email = "", password = "", profilePicture = Uri.EMPTY.toString(), gamesWon = 0, participantId = 0)) }
                 // Variable used to check if the coroutine is finished
                 var isCoroutineFinished by remember { mutableStateOf(false) }
 
@@ -266,7 +266,8 @@ fun OCGNavGraph(
                                 email = user.email,
                                 password = user.password,
                                 gamesWon = user.gamesWon,
-                                profilePicture = newProfilePicture.toString()
+                                profilePicture = newProfilePicture.toString(),
+                                participantId = user.participantId
                             )
                             usersViewModel.updateUser(updatedUser)
                             navController.navigateUp()
