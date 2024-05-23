@@ -47,7 +47,7 @@ fun HomeScreen(
                 items(state.events) { event ->
                     EventItem(
                         event,
-                        onClick = { navController.navigate(OCGRoute.EventDetails.route) }
+                        onClick = { navController.navigate(OCGRoute.EventDetails.buildRoute(event.eventId)) }
                     )
                 }
             }
@@ -79,6 +79,7 @@ fun EventItem(event: Event, onClick: () -> Unit) {
     HorizontalDivider()
 }
 
+// TODO: Aggiungere un parametro per la lista di eventi così da usare la funzione NoItemsPlaceholder in altri contesti
 @Composable
 fun NoItemsPlaceholder() {
     Column(

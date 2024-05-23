@@ -26,6 +26,7 @@ import org.koin.androidx.compose.koinViewModel
 import com.example.cgo.ui.controllers.EventsViewModel
 import com.example.cgo.ui.screens.addevent.AddEventScreen
 import com.example.cgo.ui.screens.addevent.AddEventViewModel
+import com.example.cgo.ui.screens.eventdetails.EventDetailsScreen
 import com.example.cgo.ui.screens.home.HomeScreen
 import com.example.cgo.ui.screens.profile.ProfileScreen
 import kotlinx.coroutines.Deferred
@@ -88,6 +89,7 @@ fun OCGNavGraph(
     val preferencesManager = remember { PreferencesManager(context) }
     val usersViewModel = koinViewModel<UsersViewModel>()
     val eventsVm = koinViewModel<EventsViewModel>()
+    val eventsState by eventsVm.state.collectAsStateWithLifecycle()
 
     NavHost(
         navController = navController,
@@ -96,7 +98,6 @@ fun OCGNavGraph(
     ) {
         with(OCGRoute.Home) {
             composable(route) {
-                val eventsState by eventsVm.state.collectAsStateWithLifecycle()
                 HomeScreen(
                     eventsState,
                     navController
@@ -118,8 +119,15 @@ fun OCGNavGraph(
                             onQueryComplete(
                                 usersViewModel.checkLogin(email, password),
                                 onComplete = {
-                                    login(preferencesManager = preferencesManager, email = email, password = password)
-                                    navController.popBackStack(OCGRoute.Login.route, inclusive = true)
+                                    login(
+                                        preferencesManager = preferencesManager,
+                                        email = email,
+                                        password = password
+                                    )
+                                    navController.popBackStack(
+                                        OCGRoute.Login.route,
+                                        inclusive = true
+                                    )
                                     navController.navigate(OCGRoute.Home.route)
                                 },
                                 checkResult = {
@@ -141,7 +149,11 @@ fun OCGNavGraph(
                     actions = registrationViewModel.actions,
                     onSubmit = {
                         usersViewModel.addUser(state.createUser())
-                        login(preferencesManager= preferencesManager, email = state.email, password = state.password)
+                        login(
+                            preferencesManager = preferencesManager,
+                            email = state.email,
+                            password = state.password
+                        )
                         navController.popBackStack(OCGRoute.Registration.route, inclusive = true)
                         navController.navigate(OCGRoute.Home.route)
                     }
@@ -171,35 +183,50 @@ fun OCGNavGraph(
             }
         }
         with(OCGRoute.Profile) {
-            composable(route, arguments) {backStackEntry ->
+            composable(route, arguments) { backStackEntry ->
                 // Create temporary user (also useful in case of error while fetching data from Database)
-                val user = remember { mutableStateOf(User(userId = -1, username = "NONE", email = "", password = "", profilePicture = Uri.EMPTY.toString(), gamesWon = 0)) }
+                val user = remember {
+                    mutableStateOf(
+                        User(
+                            userId = -1,
+                            username = "NONE",
+                            email = "",
+                            password = "",
+                            profilePicture = Uri.EMPTY.toString(),
+                            gamesWon = 0
+                        )
+                    )
+                }
                 // Variable used to check if the coroutine is finished
                 val isCoroutineFinished = remember { mutableStateOf(false) }
 
                 if (checkLogin(preferencesManager)) {
                     onQueryComplete(
-                        usersViewModel.getUserInfo(backStackEntry.arguments?.getString("email").toString()),
-                        onComplete = {result: Any ->
+                        usersViewModel.getUserInfo(
+                            backStackEntry.arguments?.getString("email").toString()
+                        ),
+                        onComplete = { result: Any ->
                             user.value = result as User
                             isCoroutineFinished.value = true
                         },
-                        checkResult = {result: Any ->
+                        checkResult = { result: Any ->
                             result is User
                         }
                     )
                 }
                 if (isCoroutineFinished.value) {
                     // TODO: fetch events from database
-                    val eventsState by eventsVm.state.collectAsStateWithLifecycle()
                     val events = eventsState.events
                     ProfileScreen(user = user.value, events = events, navController = navController)
                 }
             }
         }
         with(OCGRoute.EventDetails) {
-            composable(route, arguments) {
-                // TODO: Open event details screen
+            composable(route, arguments) { backStackEntry ->
+                val event = requireNotNull(eventsState.events.find {
+                    it.eventId == backStackEntry.arguments?.getInt("eventID")
+                })
+                EventDetailsScreen(event)
             }
         }
         with(OCGRoute.Settings) {
@@ -210,7 +237,7 @@ fun OCGNavGraph(
     }
 }
 
-fun checkLogin(preferencesManager: PreferencesManager) : Boolean {
+fun checkLogin(preferencesManager: PreferencesManager): Boolean {
     return preferencesManager.containsKey("email") && preferencesManager.containsKey("password")
 }
 
@@ -220,7 +247,11 @@ fun login(preferencesManager: PreferencesManager, email: String, password: Strin
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
-fun onQueryComplete(result: Deferred<Any>, onComplete: (Any) -> Unit, checkResult: (Any) -> Boolean) {
+fun onQueryComplete(
+    result: Deferred<Any>,
+    onComplete: (Any) -> Unit,
+    checkResult: (Any) -> Boolean
+) {
     result.invokeOnCompletion {
         if (it == null) {
             if (checkResult(result.getCompleted()))
