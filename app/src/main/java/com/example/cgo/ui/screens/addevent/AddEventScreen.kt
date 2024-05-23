@@ -1,13 +1,20 @@
 package com.example.cgo.ui.screens.addevent
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -26,13 +33,15 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Snackbar
-import androidx.compose.material3.SnackbarData
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TimePicker
 import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -45,6 +54,8 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavHostController
 import com.example.cgo.data.database.entities.PrivacyType
 import java.time.LocalDate
@@ -133,12 +144,9 @@ fun AddEventScreen(
                 date = state.date,
                 actions = actions
             )
-            OutlinedTextField(
-                value = state.time,
-                onValueChange = actions::setTime,
-                label = { Text("Time") },
-                modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
+            CustomTimePicker(
+                time = state.time,
+                actions = actions
             )
             // TODO: Add location picker
             OutlinedTextField(
@@ -178,6 +186,109 @@ fun AddEventScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
+fun CustomTimePicker(
+    time: String,
+    actions: AddEventActions
+) {
+    val timeState = rememberTimePickerState()
+    var isTimePickerVisible by remember { mutableStateOf(false) }
+
+    OutlinedTextField(
+        value = time,
+        onValueChange = {},
+        label = { Text("Time") },
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { isTimePickerVisible = false },
+        readOnly = true,
+        interactionSource = remember { MutableInteractionSource() }
+            .also { interactionSource ->
+                LaunchedEffect(interactionSource) {
+                    interactionSource.interactions.collect { interaction ->
+                        if (interaction is PressInteraction.Release) {
+                            isTimePickerVisible = !isTimePickerVisible
+                        }
+                    }
+                }
+            },
+    )
+    if (isTimePickerVisible) {
+        TimePickerDialog(
+            onConfirm = {
+                actions.setTime(
+                    timeState.hour.toString().padStart(2, '0') +
+                            ":" +
+                            timeState.minute.toString().padStart(2, '0')
+                )
+                isTimePickerVisible = false
+            },
+            onCancel = { isTimePickerVisible = false },
+        ) {
+            TimePicker(
+                state = timeState,
+            )
+        }
+    }
+}
+
+@Composable
+fun TimePickerDialog(
+    title: String = "Select Time",
+    onCancel: () -> Unit,
+    onConfirm: () -> Unit,
+    toggle: @Composable () -> Unit = {},
+    content: @Composable () -> Unit,
+) {
+    Dialog(
+        onDismissRequest = onCancel,
+        properties = DialogProperties(
+            usePlatformDefaultWidth = false
+        ),
+    ) {
+        Surface(
+            shape = MaterialTheme.shapes.extraLarge,
+            tonalElevation = 6.dp,
+            modifier = Modifier
+                .width(IntrinsicSize.Min)
+                .height(IntrinsicSize.Min)
+                .background(
+                    shape = MaterialTheme.shapes.extraLarge,
+                    color = MaterialTheme.colorScheme.surface
+                ),
+        ) {
+            Column(
+                modifier = Modifier.padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 20.dp),
+                    text = title,
+                    style = MaterialTheme.typography.labelMedium
+                )
+                content()
+                Row(
+                    modifier = Modifier
+                        .height(40.dp)
+                        .fillMaxWidth()
+                ) {
+                    toggle()
+                    Spacer(modifier = Modifier.weight(1f))
+                    TextButton(
+                        onClick = onCancel
+                    ) { Text("Cancel") }
+                    TextButton(
+                        onClick = onConfirm
+                    ) { Text("Confirm") }
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
 fun CustomDatePicker(
     date: String,
     actions: AddEventActions
@@ -186,12 +297,7 @@ fun CustomDatePicker(
     var isDatePickerVisible by remember { mutableStateOf(false) }
 
     OutlinedTextField(
-        value = dateState.selectedDateMillis?.let {
-            LocalDate.ofEpochDay(it / 86400000).format(
-                DateTimeFormatter.ofPattern("dd/MM/yyyy")
-            )
-        }
-            ?: date,
+        value = date,
         onValueChange = {},
         label = { Text("Date") },
         modifier = Modifier
@@ -213,14 +319,17 @@ fun CustomDatePicker(
         DatePickerDialog(
             onDismissRequest = { isDatePickerVisible = false },
             confirmButton = {
-                IconButton(onClick = {
+                TextButton(onClick = { isDatePickerVisible = false }) {
+                    Text("Cancel")
+                }
+                TextButton(onClick = {
                     actions.setDate(
                         LocalDate.ofEpochDay(dateState.selectedDateMillis!! / 86400000)
                             .format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
                     )
                     isDatePickerVisible = false
                 }) {
-                    Icon(Icons.Outlined.Check, "Confirm")
+                    Text("Confirm")
                 }
             },
             content = {
@@ -266,19 +375,22 @@ fun PrivacyTypePicker(
             }
         }
     )
-
-    DropdownMenu(
-        expanded = expanded,
-        onDismissRequest = { expanded = false },
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        PrivacyType.entries.forEach { type ->
-            DropdownMenuItem(
-                text = { Text(type.name) },
-                onClick = {
-                    onPrivacyTypeChange(type)
-                    expanded = false
-                })
+    Box {
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.BottomStart)
+        ) {
+            PrivacyType.entries.forEach { type ->
+                DropdownMenuItem(
+                    text = { Text(type.name) },
+                    onClick = {
+                        onPrivacyTypeChange(type)
+                        expanded = false
+                    })
+            }
         }
     }
 }
