@@ -21,12 +21,8 @@ class UsersViewModel(private val repository: UsersRepository) : ViewModel() {
     )
 
     fun addUser(user: User) = viewModelScope.launch { repository.upsert(user) }
-
     fun updateUser(user: User) = viewModelScope.launch { repository.upsert(user) }
-
     fun deleteUser(user: User) = viewModelScope.launch { repository.delete(user) }
-
-    fun checkLogin(email: String, password: String) : Deferred<Boolean> = viewModelScope.async { repository.checkLogin(email, password) }
-
-    fun getUserInfo(email: String) : Deferred<User> = viewModelScope.async { repository.getUserInfo(email) }
+    fun getUserOnLogin(email: String, password: String) : Deferred<User> = viewModelScope.async { repository.getUserOnLogin(email, password) }
+    fun getUserInfo(userId: Int) : Deferred<User> = viewModelScope.async { repository.getUserInfo(userId) }
 }

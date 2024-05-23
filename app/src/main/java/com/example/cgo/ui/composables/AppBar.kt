@@ -11,14 +11,17 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.example.cgo.R
 import com.example.cgo.ui.OCGRoute
-import com.example.cgo.utils.PreferencesManager
+import com.example.cgo.ui.controllers.AppViewModel
+import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -51,12 +54,14 @@ fun AppBar(
                 }
             }
             if (currentRoute.route == OCGRoute.Settings.route) {
-                val context = LocalContext.current
-                val preferencesManager = remember { PreferencesManager(context) }
+                val appViewModel = koinViewModel<AppViewModel>()
                 IconButton(onClick = {
-                    preferencesManager.clearPreferences()
-                    navController.popBackStack(OCGRoute.Profile.route, inclusive = true)
-                    navController.navigate(OCGRoute.Login.route)
+                    appViewModel.changeUserId(-1).invokeOnCompletion {
+                        if (it == null) {
+                            navController.popBackStack(OCGRoute.Profile.route, inclusive = true)
+                            navController.navigate(OCGRoute.Login.route)
+                        }
+                    }
                 }) {
                     Icon(painterResource(id = R.drawable.logout), "Logout")
                 }
