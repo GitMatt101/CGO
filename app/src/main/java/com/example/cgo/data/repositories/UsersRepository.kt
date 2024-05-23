@@ -17,7 +17,7 @@ class UsersRepository(
         return try {
             users.first().first { it.email == email && it.password == password }
         } catch (exception: NoSuchElementException) {
-            User(userId = -1, username = "NONE", email = "", password = "", profilePicture = Uri.EMPTY.toString(), gamesWon = 0)
+            User(userId = -1, username = "NONE", email = "", password = "", profilePicture = Uri.EMPTY.toString(), gamesWon = 0, participantId = -1)
         }
     }
     suspend fun getUserInfo(userId: Int) : User = users.first().first { it.userId == userId }

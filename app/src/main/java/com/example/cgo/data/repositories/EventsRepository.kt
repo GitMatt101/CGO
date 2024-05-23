@@ -13,4 +13,6 @@ class EventsRepository(
     suspend fun upsert(event: Event) = eventDAO.upsert(event)
 
     suspend fun delete(event: Event) = eventDAO.delete(event)
+
+    suspend fun getEventWithUsers() = eventDAO.getEventWithUsers()
 }

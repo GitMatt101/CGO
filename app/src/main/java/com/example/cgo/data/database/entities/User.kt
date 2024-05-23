@@ -23,4 +23,7 @@ data class User(
 
     @ColumnInfo
     val gamesWon: Int,
+
+    @ColumnInfo
+    val participantId: Int,
 )
