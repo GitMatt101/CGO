@@ -13,6 +13,7 @@ import com.example.cgo.ui.screens.login.LoginViewModel
 import com.example.cgo.ui.screens.registration.RegistrationViewModel
 import com.example.cgo.ui.controllers.EventsViewModel
 import com.example.cgo.ui.screens.addevent.AddEventViewModel
+import com.example.cgo.ui.screens.rankings.RankingsViewModel
 import com.example.cgo.ui.screens.settings.changeprofile.EditProfileViewModel
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
@@ -50,6 +51,7 @@ val appModule = module {
     viewModel { AddEventViewModel() }
     viewModel { AppViewModel(get()) }
     viewModel { EditProfileViewModel() }
+    viewModel { RankingsViewModel() }
 
     // Database entities view models
     viewModel { UsersViewModel(get()) }

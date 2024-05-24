@@ -1,8 +1,8 @@
 package com.example.cgo.data.repositories
 
-import android.content.ContentResolver
 import com.example.cgo.data.database.entities.Event
 import com.example.cgo.data.database.daos.EventDAO
+import com.example.cgo.data.database.entities.EventWithUsers
 import kotlinx.coroutines.flow.Flow
 
 class EventsRepository(
@@ -14,5 +14,5 @@ class EventsRepository(
 
     suspend fun delete(event: Event) = eventDAO.delete(event)
 
-    suspend fun getEventWithUsers() = eventDAO.getEventWithUsers()
+    suspend fun getEventWithUsers() : List<EventWithUsers> = eventDAO.getEventWithUsers()
 }

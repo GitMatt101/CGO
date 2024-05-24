@@ -30,6 +30,8 @@ import com.example.cgo.ui.screens.addevent.AddEventViewModel
 import com.example.cgo.ui.screens.eventdetails.EventDetailsScreen
 import com.example.cgo.ui.screens.home.HomeScreen
 import com.example.cgo.ui.screens.profile.ProfileScreen
+import com.example.cgo.ui.screens.rankings.RankingsScreen
+import com.example.cgo.ui.screens.rankings.RankingsViewModel
 import com.example.cgo.ui.screens.settings.SettingsScreen
 import com.example.cgo.ui.screens.settings.changeprofile.EditProfileScreen
 import com.example.cgo.ui.screens.settings.changeprofile.EditProfileViewModel
@@ -179,16 +181,22 @@ fun OCGNavGraph(
                 val addEventVm = koinViewModel<AddEventViewModel>()
                 val state by addEventVm.state.collectAsStateWithLifecycle()
                 AddEventScreen(
-                    state,
-                    addEventVm.actions,
-                    { eventsVm.addEvent(state.toEvent()) },
-                    navController
+                    state = state,
+                    actions = addEventVm.actions,
+                    onSubmit = { eventsVm.addEvent(state.toEvent(appState.userId)) },
+                    navController = navController
                 )
             }
         }
         with(OCGRoute.Rankings) {
             composable(route) {
-                // TODO: Open rankings screen
+                val rankingsViewModel = koinViewModel<RankingsViewModel>()
+                val state by rankingsViewModel.state.collectAsStateWithLifecycle()
+                RankingsScreen(
+                    state = state,
+                    actions = rankingsViewModel.actions,
+                    navController = navController
+                )
             }
         }
         with(OCGRoute.Profile) {
