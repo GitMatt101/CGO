@@ -15,6 +15,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
+import com.example.cgo.data.database.entities.Participation
 import com.example.cgo.data.database.entities.User
 import com.example.cgo.ui.controllers.AppViewModel
 import com.example.cgo.ui.controllers.UsersViewModel
@@ -25,6 +26,7 @@ import com.example.cgo.ui.screens.registration.RegistrationViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.koin.androidx.compose.koinViewModel
 import com.example.cgo.ui.controllers.EventsViewModel
+import com.example.cgo.ui.controllers.ParticipationsViewModel
 import com.example.cgo.ui.screens.addevent.AddEventScreen
 import com.example.cgo.ui.screens.addevent.AddEventViewModel
 import com.example.cgo.ui.screens.eventdetails.EventDetailsScreen
@@ -96,6 +98,7 @@ fun OCGNavGraph(
     val usersViewModel = koinViewModel<UsersViewModel>()
     val eventsVm = koinViewModel<EventsViewModel>()
     val eventsState by eventsVm.state.collectAsStateWithLifecycle()
+    val participationsViewModel = koinViewModel<ParticipationsViewModel>()
     val appViewModel = koinViewModel<AppViewModel>()
     val appState by appViewModel.state.collectAsStateWithLifecycle()
 
@@ -202,7 +205,7 @@ fun OCGNavGraph(
         with(OCGRoute.Profile) {
             composable(route, arguments) {backStackEntry: NavBackStackEntry ->
                 // Create temporary user (also useful in case of error while fetching data from Database)
-                var user by remember { mutableStateOf(User(userId = -1, username = "NONE", email = "", password = "", profilePicture = Uri.EMPTY.toString(), gamesWon = 0, participantId = 0)) }
+                var user by remember { mutableStateOf(User(userId = -1, username = "NONE", email = "", password = "", profilePicture = Uri.EMPTY.toString(), gamesWon = 0)) }
                 // Variable used to check if the coroutine is finished
                 var isCoroutineFinished by remember { mutableStateOf(false) }
 
@@ -230,7 +233,13 @@ fun OCGNavGraph(
                 val event = requireNotNull(eventsState.events.find {
                     it.eventId == backStackEntry.arguments?.getInt("eventID")
                 })
-                EventDetailsScreen(event)
+                EventDetailsScreen(
+                    event,
+                    onSubscription = { eventId: Int ->
+                        // TODO: Check if the event is already full
+                        participationsViewModel.addParticipation(Participation(appState.userId, eventId))
+                    }
+                )
             }
         }
         with(OCGRoute.Settings) {
@@ -245,7 +254,7 @@ fun OCGNavGraph(
         with(OCGRoute.EditProfile) {
             composable(route) {
                 // Create temporary user (also useful in case of error while fetching data from Database)
-                var user by remember { mutableStateOf(User(userId = -1, username = "NONE", email = "", password = "", profilePicture = Uri.EMPTY.toString(), gamesWon = 0, participantId = 0)) }
+                var user by remember { mutableStateOf(User(userId = -1, username = "NONE", email = "", password = "", profilePicture = Uri.EMPTY.toString(), gamesWon = 0)) }
                 // Variable used to check if the coroutine is finished
                 var isCoroutineFinished by remember { mutableStateOf(false) }
 
@@ -274,8 +283,7 @@ fun OCGNavGraph(
                                 email = user.email,
                                 password = user.password,
                                 gamesWon = user.gamesWon,
-                                profilePicture = newProfilePicture.toString(),
-                                participantId = user.participantId
+                                profilePicture = newProfilePicture.toString()
                             )
                             usersViewModel.updateUser(updatedUser)
                             navController.navigateUp()

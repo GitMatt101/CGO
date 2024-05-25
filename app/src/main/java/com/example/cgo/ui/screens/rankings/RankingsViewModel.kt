@@ -12,22 +12,14 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import org.koin.androidx.compose.koinViewModel
 
-enum class Filter {
-    EventsPlayed,
-    EventsWon,
-    EventsHosted
-}
-
 data class RankingsState(
-    val filter: Filter = Filter.EventsHosted,
     val users: List<UserWithEvents> = emptyList()
 )
 
 interface RankingsActions {
-    fun changeFilter(filter: Filter)
     fun changeUsersList(users: List<UserWithEvents>)
     @Composable
-    fun LoadUsersByEventsHosted()
+    fun LoadUsers()
 }
 
 class RankingsViewModel : ViewModel() {
@@ -35,11 +27,10 @@ class RankingsViewModel : ViewModel() {
     val state = _state.asStateFlow()
 
     val actions = object : RankingsActions {
-        override fun changeFilter(filter: Filter) = _state.update { it.copy(filter = filter) }
         override fun changeUsersList(users: List<UserWithEvents>) = _state.update { it.copy(users = users) }
 
         @Composable
-        override fun LoadUsersByEventsHosted() {
+        override fun LoadUsers() {
             println("Inside load users")
             _state.update { it.copy(users = emptyList()) }
             val usersViewModel = koinViewModel<UsersViewModel>()
@@ -49,11 +40,9 @@ class RankingsViewModel : ViewModel() {
                 result = usersViewModel.getUsersHosts(),
                 onComplete = {result ->
                     (result as List<*>).forEach { users.add(it as UserWithEvents) }
-                    users.sortBy { -it.events.size }
                     changeUsersList(users)
                 },
                 checkResult = {result ->
-                    println("RESULT: $result")
                     result is List<*> && result.all { it is UserWithEvents } && result.isNotEmpty()
                 }
             )

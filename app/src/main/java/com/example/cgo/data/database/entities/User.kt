@@ -4,7 +4,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-@Entity()
+@Entity
 data class User(
     @PrimaryKey(autoGenerate = true)
     val userId: Int = 0,
@@ -22,8 +22,5 @@ data class User(
     val profilePicture: String?,
 
     @ColumnInfo
-    val gamesWon: Int,
-
-    @ColumnInfo
-    val participantId: Int,
+    val gamesWon: Int
 )
