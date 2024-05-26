@@ -83,6 +83,16 @@ fun EventDetailsScreen(
             )
             Spacer(Modifier.size(8.dp))
             // TODO: Aggiungere la mappa con la location dell'evento
+            Text(
+                event.address,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                style = MaterialTheme.typography.bodySmall
+            )
+            Text(
+                event.city,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                style = MaterialTheme.typography.bodySmall
+            )
             Button(onClick = { onSubscription(event.eventId) }) {
                 Text(text = "Participate")
             }
