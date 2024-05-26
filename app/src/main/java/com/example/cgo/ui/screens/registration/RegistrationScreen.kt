@@ -15,6 +15,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -109,7 +110,7 @@ fun RegistrationScreen(
             ImageWithPlaceholder(uri = state.profilePicture, size = Size.Large)
         }
         Spacer(modifier = Modifier.weight(1.0f))
-        Divider()
+        HorizontalDivider()
         Button(
             modifier = Modifier.padding(bottom = PADDING),
             onClick = {

@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -43,7 +44,7 @@ fun LoginScreen(
             modifier = Modifier.fillMaxWidth(),
             visualTransformation =  PasswordVisualTransformation()
         )
-        Divider()
+        HorizontalDivider()
         Button(
             modifier = Modifier.fillMaxWidth(),
             onClick = {
@@ -52,7 +53,7 @@ fun LoginScreen(
         ) {
             Text(text = "Don't have an account?")
         }
-        Divider()
+        HorizontalDivider()
         Spacer(modifier = Modifier.weight(1.0f))
         Button(
             modifier = Modifier.fillMaxWidth(0.5f).padding(bottom = 10.dp),
