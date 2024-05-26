@@ -15,6 +15,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
+import com.example.cgo.data.database.entities.Participation
 import com.example.cgo.data.database.entities.User
 import com.example.cgo.ui.controllers.AppViewModel
 import com.example.cgo.ui.controllers.UsersViewModel
@@ -25,11 +26,14 @@ import com.example.cgo.ui.screens.registration.RegistrationViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.koin.androidx.compose.koinViewModel
 import com.example.cgo.ui.controllers.EventsViewModel
+import com.example.cgo.ui.controllers.ParticipationsViewModel
 import com.example.cgo.ui.screens.addevent.AddEventScreen
 import com.example.cgo.ui.screens.addevent.AddEventViewModel
 import com.example.cgo.ui.screens.eventdetails.EventDetailsScreen
 import com.example.cgo.ui.screens.home.HomeScreen
 import com.example.cgo.ui.screens.profile.ProfileScreen
+import com.example.cgo.ui.screens.rankings.RankingsScreen
+import com.example.cgo.ui.screens.rankings.RankingsViewModel
 import com.example.cgo.ui.screens.settings.SettingsScreen
 import com.example.cgo.ui.screens.settings.changeprofile.EditProfileScreen
 import com.example.cgo.ui.screens.settings.changeprofile.EditProfileViewModel
@@ -94,6 +98,7 @@ fun OCGNavGraph(
     val usersViewModel = koinViewModel<UsersViewModel>()
     val eventsVm = koinViewModel<EventsViewModel>()
     val eventsState by eventsVm.state.collectAsStateWithLifecycle()
+    val participationsViewModel = koinViewModel<ParticipationsViewModel>()
     val appViewModel = koinViewModel<AppViewModel>()
     val appState by appViewModel.state.collectAsStateWithLifecycle()
 
@@ -179,22 +184,28 @@ fun OCGNavGraph(
                 val addEventVm = koinViewModel<AddEventViewModel>()
                 val state by addEventVm.state.collectAsStateWithLifecycle()
                 AddEventScreen(
-                    state,
-                    addEventVm.actions,
-                    { eventsVm.addEvent(state.toEvent()) },
-                    navController
+                    state = state,
+                    actions = addEventVm.actions,
+                    onSubmit = { eventsVm.addEvent(state.toEvent(appState.userId)) },
+                    navController = navController
                 )
             }
         }
         with(OCGRoute.Rankings) {
             composable(route) {
-                // TODO: Open rankings screen
+                val rankingsViewModel = koinViewModel<RankingsViewModel>()
+                val state by rankingsViewModel.state.collectAsStateWithLifecycle()
+                RankingsScreen(
+                    state = state,
+                    actions = rankingsViewModel.actions,
+                    navController = navController
+                )
             }
         }
         with(OCGRoute.Profile) {
             composable(route, arguments) {backStackEntry: NavBackStackEntry ->
                 // Create temporary user (also useful in case of error while fetching data from Database)
-                var user by remember { mutableStateOf(User(userId = -1, username = "NONE", email = "", password = "", profilePicture = Uri.EMPTY.toString(), gamesWon = 0, participantId = 0)) }
+                var user by remember { mutableStateOf(User(userId = -1, username = "NONE", email = "", password = "", profilePicture = Uri.EMPTY.toString(), gamesWon = 0)) }
                 // Variable used to check if the coroutine is finished
                 var isCoroutineFinished by remember { mutableStateOf(false) }
 
@@ -222,7 +233,13 @@ fun OCGNavGraph(
                 val event = requireNotNull(eventsState.events.find {
                     it.eventId == backStackEntry.arguments?.getInt("eventID")
                 })
-                EventDetailsScreen(event)
+                EventDetailsScreen(
+                    event,
+                    onSubscription = { eventId: Int ->
+                        // TODO: Check if the event is already full
+                        participationsViewModel.addParticipation(Participation(appState.userId, eventId))
+                    }
+                )
             }
         }
         with(OCGRoute.Settings) {
@@ -237,7 +254,7 @@ fun OCGNavGraph(
         with(OCGRoute.EditProfile) {
             composable(route) {
                 // Create temporary user (also useful in case of error while fetching data from Database)
-                var user by remember { mutableStateOf(User(userId = -1, username = "NONE", email = "", password = "", profilePicture = Uri.EMPTY.toString(), gamesWon = 0, participantId = 0)) }
+                var user by remember { mutableStateOf(User(userId = -1, username = "NONE", email = "", password = "", profilePicture = Uri.EMPTY.toString(), gamesWon = 0)) }
                 // Variable used to check if the coroutine is finished
                 var isCoroutineFinished by remember { mutableStateOf(false) }
 
@@ -266,8 +283,7 @@ fun OCGNavGraph(
                                 email = user.email,
                                 password = user.password,
                                 gamesWon = user.gamesWon,
-                                profilePicture = newProfilePicture.toString(),
-                                participantId = user.participantId
+                                profilePicture = newProfilePicture.toString()
                             )
                             usersViewModel.updateUser(updatedUser)
                             navController.navigateUp()

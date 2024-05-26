@@ -3,6 +3,7 @@ package com.example.cgo.ui.controllers
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.cgo.data.database.entities.User
+import com.example.cgo.data.database.entities.UserWithEvents
 import com.example.cgo.data.repositories.UsersRepository
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
@@ -25,4 +26,5 @@ class UsersViewModel(private val repository: UsersRepository) : ViewModel() {
     fun deleteUser(user: User) = viewModelScope.launch { repository.delete(user) }
     fun getUserOnLogin(email: String, password: String) : Deferred<User> = viewModelScope.async { repository.getUserOnLogin(email, password) }
     fun getUserInfo(userId: Int) : Deferred<User> = viewModelScope.async { repository.getUserInfo(userId) }
+    fun getUsersHosts() : Deferred<List<UserWithEvents>> = viewModelScope.async { repository.getUserWithEvents() }
 }

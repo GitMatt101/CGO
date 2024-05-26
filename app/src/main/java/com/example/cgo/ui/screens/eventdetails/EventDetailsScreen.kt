@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Share
+import androidx.compose.material3.Button
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -23,7 +24,10 @@ import androidx.compose.ui.unit.dp
 import com.example.cgo.data.database.entities.Event
 
 @Composable
-fun EventDetailsScreen(event: Event) {
+fun EventDetailsScreen(
+    event: Event,
+    onSubscription: (Int) -> Unit
+) {
     val context = LocalContext.current
 
     @SuppressLint("QueryPermissionsNeeded")
@@ -79,7 +83,9 @@ fun EventDetailsScreen(event: Event) {
             )
             Spacer(Modifier.size(8.dp))
             // TODO: Aggiungere la mappa con la location dell'evento
-
+            Button(onClick = { onSubscription(event.eventId) }) {
+                Text(text = "Participate")
+            }
         }
     }
 }

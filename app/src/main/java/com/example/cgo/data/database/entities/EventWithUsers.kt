@@ -1,6 +1,7 @@
 package com.example.cgo.data.database.entities
 
 import androidx.room.Embedded
+import androidx.room.Junction
 import androidx.room.Relation
 
 data class EventWithUsers(
@@ -9,7 +10,8 @@ data class EventWithUsers(
 
     @Relation(
         parentColumn = "eventId",
-        entityColumn = "participantId"
+        entityColumn = "userId",
+        associateBy = Junction(Participation::class)
     )
     val participants: List<User>
 )

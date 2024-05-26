@@ -24,7 +24,7 @@ data class AddEventState(
                 && maxParticipants > 0
                 && privacyType != PrivacyType.NONE
 
-    fun toEvent() = Event(
+    fun toEvent(eventCreatorId: Int) = Event(
         title = title,
         description = description,
         date = date,
@@ -32,8 +32,8 @@ data class AddEventState(
         location = location,
         maxParticipants = maxParticipants,
         privacyType = privacyType,
-        // TODO: Replace with actual user id
-        eventCreatorId = 0
+        eventCreatorId = eventCreatorId,
+        winnerId = null
     )
 }
 
