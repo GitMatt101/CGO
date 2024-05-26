@@ -116,7 +116,7 @@ fun TabsContent(pagerState: PagerState, rankingsState: RankingsState, navControl
             )
             1 -> TabContentScreen(
                 navController = navController,
-                usersWithEvents = rankingsState.users.map { Pair(it.user, it.events) }, // TODO: change to events won
+                usersWithEvents = rankingsState.users.map { Pair(it.user, it.wonEvents) },
                 text = "Events Won"
             )
             2 -> TabContentScreen(

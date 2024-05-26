@@ -39,4 +39,7 @@ data class Event(
 
     @ColumnInfo
     val eventCreatorId: Int,
+
+    @ColumnInfo
+    val winnerId: Int?
 )

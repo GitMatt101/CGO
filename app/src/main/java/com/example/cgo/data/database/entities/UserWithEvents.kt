@@ -19,5 +19,11 @@ data class UserWithEvents(
         parentColumn = "userId",
         entityColumn = "eventCreatorId"
     )
-    val createdEvents: List<Event>
+    val createdEvents: List<Event>,
+
+    @Relation(
+        parentColumn = "userId",
+        entityColumn = "winnerId"
+    )
+    val wonEvents: List<Event>
 )

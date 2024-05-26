@@ -32,7 +32,8 @@ data class AddEventState(
         location = location,
         maxParticipants = maxParticipants,
         privacyType = privacyType,
-        eventCreatorId = eventCreatorId
+        eventCreatorId = eventCreatorId,
+        winnerId = null
     )
 }
 
