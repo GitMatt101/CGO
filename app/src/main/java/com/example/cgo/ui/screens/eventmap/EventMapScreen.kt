@@ -24,6 +24,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
+import androidx.navigation.NavHostController
+import com.example.cgo.data.remote.OSMDataSource
+import com.example.cgo.ui.OCGRoute
 import com.example.cgo.ui.controllers.EventsState
 import com.example.cgo.utils.LocationService
 import org.koin.compose.koinInject
@@ -36,9 +39,11 @@ import org.osmdroid.views.overlay.Marker
 @Composable
 fun EventMapScreen(
     eventsState: EventsState,
+    navController: NavHostController
 ) {
     val context = LocalContext.current
     val locationService = koinInject<LocationService>()
+    val osmDataSource = koinInject<OSMDataSource>()
 
     var lat by remember { mutableDoubleStateOf(41.0) }
     var lon by remember { mutableDoubleStateOf(12.0) }
@@ -77,6 +82,7 @@ fun EventMapScreen(
                 lat = it.latitude
                 lon = it.longitude
                 mapView?.controller?.setCenter(GeoPoint(lat, lon))
+                mapView?.controller?.setZoom(15.0)
 
                 val myPosition = Marker(mapView).apply {
                     position = GeoPoint(lat, lon)
@@ -88,14 +94,21 @@ fun EventMapScreen(
         } else {
             mapView?.overlays?.removeIf { it is Marker }
         }
-        // TODO: Add markers for events
-//        eventsState.events.forEach { event ->
-//            val eventMarker = Marker(mapView).apply {
-//                position = GeoPoint(event.latitude, event.longitude)
-//                setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-//                title = event.title
-//            }
-//        }
+
+        eventsState.events.forEach { event ->
+            osmDataSource.getPlaceByEventLocation(event.address.replace(" ", "+"), event.city.replace(" ", "+")).forEach { place ->
+                val eventMarker = Marker(mapView).apply {
+                    position = GeoPoint(place.latitude, place.longitude)
+                    setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+                    title = event.title
+                    setOnMarkerClickListener { _, _ ->
+                        navController.navigate(OCGRoute.EventDetails.buildRoute(event.eventId))
+                        true
+                    }
+                }
+                mapView?.overlays?.add(eventMarker)
+            }
+        }
     }
 
     Box(
@@ -109,7 +122,7 @@ fun EventMapScreen(
 
                 MapView(context).apply {
                     setMultiTouchControls(true)
-                    controller.setZoom(15.0)
+                    controller.setZoom(5.0)
                     mapView = this
                 }
             },
@@ -119,8 +132,12 @@ fun EventMapScreen(
         )
         FloatingActionButton(
             onClick = {
+                if (locationService.isLocationEnabled == true) {
+                    mapView?.controller?.setZoom(15.0)
+                } else {
+                    mapView?.controller?.setZoom(5.0)
+                }
                 mapView?.controller?.animateTo(GeoPoint(lat, lon))
-                mapView?.controller?.setZoom(15.0)
             },
             modifier = Modifier
                 .align(Alignment.BottomEnd)

@@ -29,7 +29,10 @@ data class Event(
     val time: String,
 
     @ColumnInfo
-    val location: String,
+    val address: String,
+
+    @ColumnInfo
+    val city: String,
 
     @ColumnInfo
     val maxParticipants: Int,
