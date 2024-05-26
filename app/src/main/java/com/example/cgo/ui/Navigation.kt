@@ -17,6 +17,7 @@ import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import com.example.cgo.data.database.entities.Participation
 import com.example.cgo.data.database.entities.User
+import com.example.cgo.data.database.entities.UserWithEvents
 import com.example.cgo.ui.controllers.AppViewModel
 import com.example.cgo.ui.controllers.UsersViewModel
 import com.example.cgo.ui.screens.login.LoginScreen
@@ -205,25 +206,36 @@ fun OCGNavGraph(
         with(OCGRoute.Profile) {
             composable(route, arguments) {backStackEntry: NavBackStackEntry ->
                 // Create temporary user (also useful in case of error while fetching data from Database)
-                var user by remember { mutableStateOf(User(userId = -1, username = "NONE", email = "", password = "", profilePicture = Uri.EMPTY.toString(), gamesWon = 0)) }
+                var userWithEvents by remember { mutableStateOf(UserWithEvents(
+                        user = User(
+                            userId = -1,
+                            username = "",
+                            email = "",
+                            password = "",
+                            profilePicture = null,
+                            gamesWon = -1
+                        ),
+                        events = emptyList(),
+                        wonEvents = emptyList(),
+                        createdEvents = emptyList()
+                    ))
+                }
                 // Variable used to check if the coroutine is finished
                 var isCoroutineFinished by remember { mutableStateOf(false) }
 
                 if (backStackEntry.arguments?.getInt("userId") != -1) {
                     onQueryComplete(
-                        usersViewModel.getUserInfo(backStackEntry.arguments?.getInt("userId") ?: -1),
+                        result = usersViewModel.getUserWithEventsById(backStackEntry.arguments?.getInt("userId") ?: -1),
                         onComplete = {result: Any ->
-                            user = result as User
+                            userWithEvents = result as UserWithEvents
                             isCoroutineFinished = true
                         },
-                        checkResult = {result: Any ->
-                            result is User && result.userId != -1
+                        checkResult = {result: Any? ->
+                            result != null && result is UserWithEvents
                         }
                     )
                     if (isCoroutineFinished) {
-                        // TODO: fetch events from database
-                        val events = eventsState.events
-                        ProfileScreen(user = user, events = events, navController = navController)
+                        ProfileScreen(user = userWithEvents.user, events = userWithEvents.events, navController = navController)
                     }
                 }
             }
@@ -264,8 +276,8 @@ fun OCGNavGraph(
                         user = result as User
                         isCoroutineFinished = true
                     },
-                    checkResult = { result: Any ->
-                        result is User && result.userId != -1
+                    checkResult = { result: Any? ->
+                        result != null && result is User
                     }
                 )
                 if (appState.userId != -1 && isCoroutineFinished) {
@@ -296,11 +308,11 @@ fun OCGNavGraph(
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
-fun onQueryComplete(result: Deferred<Any>, onComplete: (Any) -> Unit, checkResult: (Any) -> Boolean) {
+fun onQueryComplete(result: Deferred<Any?>, onComplete: (Any) -> Unit, checkResult: (Any?) -> Boolean) {
     result.invokeOnCompletion {
         if (it == null) {
             if (checkResult(result.getCompleted()))
-                onComplete(result.getCompleted())
+                onComplete(result.getCompleted()!!)
         }
     }
 }

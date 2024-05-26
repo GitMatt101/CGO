@@ -11,16 +11,30 @@ class UsersRepository(
     private val userDAO: UserDAO
 ) {
     val users: Flow<List<User>> = userDAO.getAll()
+    val usersWithEvents: Flow<List<UserWithEvents>> = userDAO.getUsersWithEvents()
 
     suspend fun upsert(user: User) = userDAO.upsert(user)
     suspend fun delete(user: User) = userDAO.delete(user)
-    suspend fun getUserOnLogin(email: String, password: String) : User {
+    suspend fun getUserOnLogin(email: String, password: String) : User? {
         return try {
             users.first().first { it.email == email && it.password == password }
         } catch (exception: NoSuchElementException) {
-            User(userId = -1, username = "NONE", email = "", password = "", profilePicture = Uri.EMPTY.toString(), gamesWon = 0)
+            null
         }
     }
-    suspend fun getUserInfo(userId: Int) : User = users.first().first { it.userId == userId }
-    suspend fun getUserWithEvents() : List<UserWithEvents> = userDAO.getUserWithEvents()
+    suspend fun getUserInfo(userId: Int) : User? {
+        return try {
+            users.first().first { it.userId == userId }
+        } catch (exception: NoSuchElementException) {
+            null
+        }
+    }
+    suspend fun getUsersWithEvents() : List<UserWithEvents> = usersWithEvents.first()
+    suspend fun getUserWithEventsById(userId: Int) : UserWithEvents? {
+        return try {
+            usersWithEvents.first().first { it.user.userId == userId }
+        } catch (exception: NoSuchElementException) {
+            null
+        }
+    }
 }
