@@ -74,6 +74,13 @@ dependencies {
     implementation("androidx.room:room-runtime:$roomVersion")
     ksp("androidx.room:room-compiler:$roomVersion")
     implementation("androidx.room:room-ktx:$roomVersion")
+    implementation("com.google.android.gms:play-services-location:21.2.0")
+    implementation ("org.osmdroid:osmdroid-android:6.1.18")
+    val ktorVersion = "2.3.8"
+    implementation("io.ktor:ktor-client-core:$ktorVersion")
+    implementation("io.ktor:ktor-client-okhttp:$ktorVersion")
+    implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
     implementation(libs.coil.compose)
     implementation(libs.core.ktx)
     testImplementation(libs.junit)

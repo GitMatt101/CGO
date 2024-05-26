@@ -28,6 +28,7 @@ import com.example.cgo.ui.controllers.EventsViewModel
 import com.example.cgo.ui.screens.addevent.AddEventScreen
 import com.example.cgo.ui.screens.addevent.AddEventViewModel
 import com.example.cgo.ui.screens.eventdetails.EventDetailsScreen
+import com.example.cgo.ui.screens.eventmap.EventMapScreen
 import com.example.cgo.ui.screens.home.HomeScreen
 import com.example.cgo.ui.screens.profile.ProfileScreen
 import com.example.cgo.ui.screens.settings.SettingsScreen
@@ -124,13 +125,17 @@ fun OCGNavGraph(
                         onLogin = { email: String, password: String ->
                             onQueryComplete(
                                 usersViewModel.getUserOnLogin(email = email, password = password),
-                                onComplete = {result: Any ->
-                                    appViewModel.changeUserId((result as User).userId).invokeOnCompletion {
-                                        if (it == null) {
-                                            navController.popBackStack(OCGRoute.Login.route, inclusive = true)
-                                            navController.navigate(OCGRoute.Home.route)
+                                onComplete = { result: Any ->
+                                    appViewModel.changeUserId((result as User).userId)
+                                        .invokeOnCompletion {
+                                            if (it == null) {
+                                                navController.popBackStack(
+                                                    OCGRoute.Login.route,
+                                                    inclusive = true
+                                                )
+                                                navController.navigate(OCGRoute.Home.route)
+                                            }
                                         }
-                                    }
                                 },
                                 checkResult = {
                                     it is User && it.userId != -1
@@ -152,14 +157,21 @@ fun OCGNavGraph(
                     onSubmit = {
                         usersViewModel.addUser(state.createUser())
                         onQueryComplete(
-                            usersViewModel.getUserOnLogin(email = state.email, password = state.password),
-                            onComplete = {result: Any ->
-                                appViewModel.changeUserId((result as User).userId).invokeOnCompletion {
-                                    if (it == null) {
-                                        navController.popBackStack(OCGRoute.Login.route, inclusive = true)
-                                        navController.navigate(OCGRoute.Home.route)
+                            usersViewModel.getUserOnLogin(
+                                email = state.email,
+                                password = state.password
+                            ),
+                            onComplete = { result: Any ->
+                                appViewModel.changeUserId((result as User).userId)
+                                    .invokeOnCompletion {
+                                        if (it == null) {
+                                            navController.popBackStack(
+                                                OCGRoute.Login.route,
+                                                inclusive = true
+                                            )
+                                            navController.navigate(OCGRoute.Home.route)
+                                        }
                                     }
-                                }
                             },
                             checkResult = {
                                 it is User && it.userId != -1
@@ -192,20 +204,34 @@ fun OCGNavGraph(
             }
         }
         with(OCGRoute.Profile) {
-            composable(route, arguments) {backStackEntry: NavBackStackEntry ->
+            composable(route, arguments) { backStackEntry: NavBackStackEntry ->
                 // Create temporary user (also useful in case of error while fetching data from Database)
-                var user by remember { mutableStateOf(User(userId = -1, username = "NONE", email = "", password = "", profilePicture = Uri.EMPTY.toString(), gamesWon = 0, participantId = 0)) }
+                var user by remember {
+                    mutableStateOf(
+                        User(
+                            userId = -1,
+                            username = "NONE",
+                            email = "",
+                            password = "",
+                            profilePicture = Uri.EMPTY.toString(),
+                            gamesWon = 0,
+                            participantId = 0
+                        )
+                    )
+                }
                 // Variable used to check if the coroutine is finished
                 var isCoroutineFinished by remember { mutableStateOf(false) }
 
                 if (backStackEntry.arguments?.getInt("userId") != -1) {
                     onQueryComplete(
-                        usersViewModel.getUserInfo(backStackEntry.arguments?.getInt("userId") ?: -1),
-                        onComplete = {result: Any ->
+                        usersViewModel.getUserInfo(
+                            backStackEntry.arguments?.getInt("userId") ?: -1
+                        ),
+                        onComplete = { result: Any ->
                             user = result as User
                             isCoroutineFinished = true
                         },
-                        checkResult = {result: Any ->
+                        checkResult = { result: Any ->
                             result is User && result.userId != -1
                         }
                     )
@@ -237,7 +263,19 @@ fun OCGNavGraph(
         with(OCGRoute.EditProfile) {
             composable(route) {
                 // Create temporary user (also useful in case of error while fetching data from Database)
-                var user by remember { mutableStateOf(User(userId = -1, username = "NONE", email = "", password = "", profilePicture = Uri.EMPTY.toString(), gamesWon = 0, participantId = 0)) }
+                var user by remember {
+                    mutableStateOf(
+                        User(
+                            userId = -1,
+                            username = "NONE",
+                            email = "",
+                            password = "",
+                            profilePicture = Uri.EMPTY.toString(),
+                            gamesWon = 0,
+                            participantId = 0
+                        )
+                    )
+                }
                 // Variable used to check if the coroutine is finished
                 var isCoroutineFinished by remember { mutableStateOf(false) }
 
@@ -259,7 +297,7 @@ fun OCGNavGraph(
                         profilePicture = user.profilePicture,
                         state = state,
                         actions = editProfileViewModel.actions,
-                        onSubmit = {newUsername: String, newProfilePicture: Uri ->
+                        onSubmit = { newUsername: String, newProfilePicture: Uri ->
                             val updatedUser = User(
                                 user.userId,
                                 username = newUsername,
@@ -276,11 +314,20 @@ fun OCGNavGraph(
                 }
             }
         }
+        with(OCGRoute.EventsMap) {
+            composable(route) {
+                EventMapScreen(eventsState)
+            }
+        }
     }
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
-fun onQueryComplete(result: Deferred<Any>, onComplete: (Any) -> Unit, checkResult: (Any) -> Boolean) {
+fun onQueryComplete(
+    result: Deferred<Any>,
+    onComplete: (Any) -> Unit,
+    checkResult: (Any) -> Boolean
+) {
     result.invokeOnCompletion {
         if (it == null) {
             if (checkResult(result.getCompleted()))
