@@ -278,6 +278,20 @@ fun OCGNavGraph(
                     onSubscription = { eventId: Int ->
                         // TODO: Check if the event is already full
                         participationsViewModel.addParticipation(Participation(appState.userId, eventId))
+                    },
+                    onWinnerSelection = {userId: Int ->
+                        eventsVm.updateEvent(Event(
+                            eventId = eventWithUsers.event.eventId,
+                            title = eventWithUsers.event.title,
+                            description = eventWithUsers.event.description,
+                            date = eventWithUsers.event.date,
+                            time = eventWithUsers.event.time,
+                            location = eventWithUsers.event.location,
+                            maxParticipants = eventWithUsers.event.maxParticipants,
+                            privacyType = eventWithUsers.event.privacyType,
+                            eventCreatorId = eventWithUsers.event.eventCreatorId,
+                            winnerId = userId
+                        ))
                     }
                 )
             }

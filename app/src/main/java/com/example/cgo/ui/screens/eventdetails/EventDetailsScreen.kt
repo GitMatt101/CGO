@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -24,12 +25,17 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import androidx.navigation.NavHostController
 import com.example.cgo.data.database.entities.EventWithUsers
@@ -42,7 +48,8 @@ import com.example.cgo.ui.composables.Size
 fun EventDetailsScreen(
     eventWithUsers: EventWithUsers,
     navController: NavHostController,
-    onSubscription: (Int) -> Unit
+    onSubscription: (Int) -> Unit,
+    onWinnerSelection: (Int) -> Unit
 ) {
     val context = LocalContext.current
 
@@ -97,7 +104,7 @@ fun EventDetailsScreen(
                 style = MaterialTheme.typography.bodySmall
             )
             Spacer(Modifier.size(8.dp))
-            ParticipantsList(users = eventWithUsers.participants, navController = navController)
+            ParticipantsList(eventWithUsers = eventWithUsers, navController = navController, onWinnerSelection = onWinnerSelection)
             Spacer(Modifier.size(8.dp))
             // TODO: Aggiungere la mappa con la location dell'evento
             Button(onClick = { onSubscription(eventWithUsers.event.eventId) }) {
@@ -108,7 +115,11 @@ fun EventDetailsScreen(
 }
 
 @Composable
-fun ParticipantsList(users: List<User>, navController: NavHostController) {
+fun ParticipantsList (
+    eventWithUsers: EventWithUsers,
+    navController: NavHostController,
+    onWinnerSelection: (Int) -> Unit
+) {
     Column (
         modifier = Modifier
             .padding(horizontal = 10.dp)
@@ -116,11 +127,12 @@ fun ParticipantsList(users: List<User>, navController: NavHostController) {
     ) {
         Text(text = "Participants", fontWeight = FontWeight.Bold, modifier = Modifier.align(Alignment.CenterHorizontally))
         Spacer(Modifier.size(10.dp))
-        if (users.isNotEmpty()) {
+        if (eventWithUsers.participants.isNotEmpty()) {
+            var winnerId by remember { mutableStateOf(eventWithUsers.event.winnerId) }
             LazyColumn (
                 modifier = Modifier.border(width = 2.dp, color = Color.DarkGray)
             ) {
-                items(users) {user: User ->
+                items(eventWithUsers.participants) {user: User ->
                     ListItem(
                         modifier = Modifier.clickable(onClick = { navController.navigate(OCGRoute.Profile.buildRoute(user.userId)) }),
                         headlineContent = {
@@ -132,6 +144,19 @@ fun ParticipantsList(users: List<User>, navController: NavHostController) {
                                         .align(Alignment.CenterVertically),
                                     text = user.username
                                 )
+                            }
+                        },
+                        trailingContent = {
+                            if (user.userId != winnerId) {
+                                Button(
+                                    modifier = Modifier.align(alignment = Alignment.End),
+                                    onClick = {
+                                        onWinnerSelection(user.userId)
+                                        winnerId = user.userId
+                                    }
+                                ) {
+                                    Text(text = "Select Winner", fontSize = 15.sp)
+                                }
                             }
                         }
                     )

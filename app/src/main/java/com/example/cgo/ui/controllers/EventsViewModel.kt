@@ -24,6 +24,7 @@ class EventsViewModel(
     )
 
     fun addEvent(event: Event) = viewModelScope.launch { repository.upsert(event) }
+    fun updateEvent(event: Event) = viewModelScope.launch { repository.upsert(event) }
     fun deleteEvent(event: Event) = viewModelScope.launch { repository.delete(event) }
     fun getEventWithUsersById(eventId: Int) : Deferred<EventWithUsers?> = viewModelScope.async { repository.getEventWithUsersById(eventId) }
 }
