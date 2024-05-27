@@ -3,7 +3,10 @@ package com.example.cgo.ui.controllers
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.cgo.data.database.entities.Event
+import com.example.cgo.data.database.entities.EventWithUsers
 import com.example.cgo.data.repositories.EventsRepository
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -20,11 +23,8 @@ class EventsViewModel(
         initialValue = EventsState(emptyList())
     )
 
-    fun addEvent(event: Event) = viewModelScope.launch {
-        repository.upsert(event)
-    }
-
-    fun deleteEvent(event: Event) = viewModelScope.launch {
-        repository.delete(event)
-    }
+    fun addEvent(event: Event) = viewModelScope.launch { repository.upsert(event) }
+    fun updateEvent(event: Event) = viewModelScope.launch { repository.upsert(event) }
+    fun deleteEvent(event: Event) = viewModelScope.launch { repository.delete(event) }
+    fun getEventWithUsersById(eventId: Int) : Deferred<EventWithUsers?> = viewModelScope.async { repository.getEventWithUsersById(eventId) }
 }

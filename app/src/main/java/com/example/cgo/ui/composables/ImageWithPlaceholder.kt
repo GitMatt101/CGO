@@ -20,6 +20,7 @@ import coil.request.ImageRequest
 import com.example.cgo.R
 
 enum class Size {
+    VerySmall,
     Small,
     Large
 }
@@ -35,7 +36,11 @@ fun ImageWithPlaceholder(uri: Uri?, size: Size) {
             "Profile Picture",
             contentScale = ContentScale.Fit,
             modifier = Modifier
-                .size(if (size == Size.Small) 72.dp else 128.dp)
+                .size(when(size) {
+                    Size.VerySmall -> 36.dp
+                    Size.Small -> 72.dp
+                    Size.Large -> 128.dp
+                })
                 .clip(CircleShape)
         )
     } else {
@@ -45,10 +50,13 @@ fun ImageWithPlaceholder(uri: Uri?, size: Size) {
             contentScale = ContentScale.Fit,
             colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSecondary),
             modifier = Modifier
-                .size(if (size == Size.Small) 72.dp else 128.dp)
+                .size(when(size) {
+                    Size.VerySmall -> 36.dp
+                    Size.Small -> 72.dp
+                    Size.Large -> 128.dp
+                })
                 .clip(CircleShape)
                 .background(MaterialTheme.colorScheme.secondary)
-                .padding(if (size == Size.Small) 20.dp else 36.dp)
         )
     }
 }

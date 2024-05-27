@@ -24,7 +24,8 @@ class UsersViewModel(private val repository: UsersRepository) : ViewModel() {
     fun addUser(user: User) = viewModelScope.launch { repository.upsert(user) }
     fun updateUser(user: User) = viewModelScope.launch { repository.upsert(user) }
     fun deleteUser(user: User) = viewModelScope.launch { repository.delete(user) }
-    fun getUserOnLogin(email: String, password: String) : Deferred<User> = viewModelScope.async { repository.getUserOnLogin(email, password) }
-    fun getUserInfo(userId: Int) : Deferred<User> = viewModelScope.async { repository.getUserInfo(userId) }
-    fun getUsersHosts() : Deferred<List<UserWithEvents>> = viewModelScope.async { repository.getUserWithEvents() }
+    fun getUserOnLogin(email: String, password: String) : Deferred<User?> = viewModelScope.async { repository.getUserOnLogin(email, password) }
+    fun getUserInfo(userId: Int) : Deferred<User?> = viewModelScope.async { repository.getUserInfo(userId) }
+    fun getUsersWithEvents() : Deferred<List<UserWithEvents>> = viewModelScope.async { repository.getUsersWithEvents() }
+    fun getUserWithEventsById(userId: Int) : Deferred<UserWithEvents?> = viewModelScope.async { repository.getUserWithEventsById(userId) }
 }

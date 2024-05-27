@@ -31,13 +31,12 @@ class RankingsViewModel : ViewModel() {
 
         @Composable
         override fun LoadUsers() {
-            println("Inside load users")
             _state.update { it.copy(users = emptyList()) }
             val usersViewModel = koinViewModel<UsersViewModel>()
             val users = mutableListOf<UserWithEvents>()
             // Retrieves all users with events
             onQueryComplete(
-                result = usersViewModel.getUsersHosts(),
+                result = usersViewModel.getUsersWithEvents(),
                 onComplete = {result ->
                     (result as List<*>).forEach { users.add(it as UserWithEvents) }
                     changeUsersList(users)
