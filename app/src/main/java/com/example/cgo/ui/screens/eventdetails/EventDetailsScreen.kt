@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -119,9 +118,17 @@ fun EventDetailsScreen(
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
                 style = MaterialTheme.typography.bodySmall
             )
-            var isParticipant by remember { mutableStateOf(eventWithUsers.participants.find { participant: User -> participant.userId == loggedUserId } != null) }
             var participants by remember { mutableStateOf(eventWithUsers.participants) }
-            if (!isParticipant) {
+            var isParticipant by remember { mutableStateOf(eventWithUsers.participants.find { participant: User -> participant.userId == loggedUserId } != null) }
+            if (isParticipant) {
+                Button(onClick = {
+                    onSubscriptionCanceled(eventWithUsers.event.eventId)
+                    isParticipant = false
+                    participants = loadParticipants()
+                }) {
+                    Text(text = "Cancel Participation")
+                }
+            } else if (eventWithUsers.event.maxParticipants > eventWithUsers.participants.size) {
                 Button (
                     onClick = {
                         onSubscription(eventWithUsers.event.eventId)
@@ -130,14 +137,6 @@ fun EventDetailsScreen(
                     }
                 ) {
                     Text(text = "Participate")
-                }
-            } else {
-                Button(onClick = {
-                    onSubscriptionCanceled(eventWithUsers.event.eventId)
-                    isParticipant = false
-                    participants = loadParticipants()
-                }) {
-                    Text(text = "Cancel Participation")
                 }
             }
             ListItem(
@@ -181,7 +180,7 @@ fun ParticipantsList (
             .padding(horizontal = 10.dp)
             .padding(bottom = 10.dp)
     ) {
-        Text(text = "Participants", fontWeight = FontWeight.Bold, modifier = Modifier.align(Alignment.CenterHorizontally))
+        Text(text = "Participants (${participants.size}/${event.maxParticipants})", fontWeight = FontWeight.Bold, modifier = Modifier.align(Alignment.CenterHorizontally))
         Spacer(Modifier.size(10.dp))
         if (participants.isNotEmpty()) {
             var winnerId by remember { mutableStateOf(event.winnerId) }
