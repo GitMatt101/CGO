@@ -15,7 +15,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
+import com.example.cgo.data.database.entities.Event
+import com.example.cgo.data.database.entities.EventWithUsers
 import com.example.cgo.data.database.entities.Participation
+import com.example.cgo.data.database.entities.PrivacyType
 import com.example.cgo.data.database.entities.User
 import com.example.cgo.data.database.entities.UserWithEvents
 import com.example.cgo.ui.controllers.AppViewModel
@@ -242,11 +245,36 @@ fun OCGNavGraph(
         }
         with(OCGRoute.EventDetails) {
             composable(route, arguments) { backStackEntry ->
-                val event = requireNotNull(eventsState.events.find {
-                    it.eventId == backStackEntry.arguments?.getInt("eventID")
-                })
+                var eventWithUsers by remember { mutableStateOf(EventWithUsers(
+                    event = Event(
+                        eventId = -1,
+                        title = "",
+                        description = "",
+                        date = "",
+                        time = "",
+                        location = "",
+                        maxParticipants = -1,
+                        privacyType = PrivacyType.NONE,
+                        eventCreatorId = -1,
+                        winnerId = null
+                    ),
+                    participants = emptyList()
+                ))
+                }
+                var isCoroutineFinished by remember { mutableStateOf(false) }
+                onQueryComplete(
+                    result = eventsVm.getEventWithUsersById(backStackEntry.arguments?.getInt("eventID") ?: -1),
+                    onComplete = {result: Any ->
+                        eventWithUsers = result as EventWithUsers
+                        isCoroutineFinished = true
+                    },
+                    checkResult = {result: Any? ->
+                        result != null && result is EventWithUsers
+                    }
+                )
                 EventDetailsScreen(
-                    event,
+                    eventWithUsers,
+                    navController = navController,
                     onSubscription = { eventId: Int ->
                         // TODO: Check if the event is already full
                         participationsViewModel.addParticipation(Participation(appState.userId, eventId))

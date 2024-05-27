@@ -1,6 +1,5 @@
 package com.example.cgo.data.repositories
 
-import android.net.Uri
 import com.example.cgo.data.database.entities.User
 import com.example.cgo.data.database.daos.UserDAO
 import com.example.cgo.data.database.entities.UserWithEvents

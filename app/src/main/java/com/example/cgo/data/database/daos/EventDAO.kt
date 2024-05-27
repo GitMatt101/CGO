@@ -23,5 +23,5 @@ interface EventDAO {
 
     @Transaction
     @Query("SELECT * FROM event")
-    suspend fun getEventWithUsers(): List<EventWithUsers>
+    fun getEventsWithUsers(): Flow<List<EventWithUsers>>
 }
