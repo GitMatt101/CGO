@@ -47,6 +47,7 @@ import com.example.cgo.ui.composables.Size
 @Composable
 fun EventDetailsScreen(
     eventWithUsers: EventWithUsers,
+    loggedUserId: Int,
     navController: NavHostController,
     onSubscription: (Int) -> Unit,
     onWinnerSelection: (Int) -> Unit
@@ -104,7 +105,7 @@ fun EventDetailsScreen(
                 style = MaterialTheme.typography.bodySmall
             )
             Spacer(Modifier.size(8.dp))
-            ParticipantsList(eventWithUsers = eventWithUsers, navController = navController, onWinnerSelection = onWinnerSelection)
+            ParticipantsList(eventWithUsers = eventWithUsers, loggedUserId = loggedUserId, navController = navController, onWinnerSelection = onWinnerSelection)
             Spacer(Modifier.size(8.dp))
             // TODO: Aggiungere la mappa con la location dell'evento
             Button(onClick = { onSubscription(eventWithUsers.event.eventId) }) {
@@ -117,6 +118,7 @@ fun EventDetailsScreen(
 @Composable
 fun ParticipantsList (
     eventWithUsers: EventWithUsers,
+    loggedUserId: Int,
     navController: NavHostController,
     onWinnerSelection: (Int) -> Unit
 ) {
@@ -147,7 +149,7 @@ fun ParticipantsList (
                             }
                         },
                         trailingContent = {
-                            if (user.userId != winnerId) {
+                            if (user.userId != winnerId && loggedUserId == eventWithUsers.event.eventCreatorId) {
                                 Button(
                                     modifier = Modifier.align(alignment = Alignment.End),
                                     onClick = {

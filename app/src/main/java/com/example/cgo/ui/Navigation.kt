@@ -275,6 +275,7 @@ fun OCGNavGraph(
                 EventDetailsScreen(
                     eventWithUsers,
                     navController = navController,
+                    loggedUserId = appState.userId,
                     onSubscription = { eventId: Int ->
                         // TODO: Check if the event is already full
                         participationsViewModel.addParticipation(Participation(appState.userId, eventId))
