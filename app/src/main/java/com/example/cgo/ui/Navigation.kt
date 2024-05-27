@@ -259,42 +259,92 @@ fun OCGNavGraph(
                         winnerId = null
                     ),
                     participants = emptyList()
-                ))
-                }
-                var isCoroutineFinished by remember { mutableStateOf(false) }
+                )) }
+                var user by remember { mutableStateOf(User(
+                    userId = -1,
+                    username = "",
+                    email = "",
+                    password = "",
+                    profilePicture = null,
+                    gamesWon = -1
+                )) }
+                var isEventCoroutineFinished by remember { mutableStateOf(false) }
+                var isUserCoroutineFinished by remember { mutableStateOf(false) }
                 onQueryComplete(
                     result = eventsVm.getEventWithUsersById(backStackEntry.arguments?.getInt("eventID") ?: -1),
                     onComplete = {result: Any ->
                         eventWithUsers = result as EventWithUsers
-                        isCoroutineFinished = true
+                        isEventCoroutineFinished = true
                     },
                     checkResult = {result: Any? ->
                         result != null && result is EventWithUsers
                     }
                 )
-                EventDetailsScreen(
-                    eventWithUsers,
-                    navController = navController,
-                    loggedUserId = appState.userId,
-                    onSubscription = { eventId: Int ->
-                        // TODO: Check if the event is already full
-                        participationsViewModel.addParticipation(Participation(appState.userId, eventId))
+                onQueryComplete(
+                    result = usersViewModel.getUserInfo(eventWithUsers.event.eventCreatorId),
+                    onComplete = {result: Any ->
+                        user = result as User
+                        isUserCoroutineFinished = true
                     },
-                    onWinnerSelection = {userId: Int ->
-                        eventsVm.updateEvent(Event(
-                            eventId = eventWithUsers.event.eventId,
-                            title = eventWithUsers.event.title,
-                            description = eventWithUsers.event.description,
-                            date = eventWithUsers.event.date,
-                            time = eventWithUsers.event.time,
-                            location = eventWithUsers.event.location,
-                            maxParticipants = eventWithUsers.event.maxParticipants,
-                            privacyType = eventWithUsers.event.privacyType,
-                            eventCreatorId = eventWithUsers.event.eventCreatorId,
-                            winnerId = userId
-                        ))
+                    checkResult = {result: Any? ->
+                        result != null && result is User
                     }
                 )
+                if (isEventCoroutineFinished && isUserCoroutineFinished) {
+                    EventDetailsScreen(
+                        eventWithUsers,
+                        eventCreator = user,
+                        navController = navController,
+                        loggedUserId = appState.userId,
+                        onSubscription = { eventId: Int ->
+                            // TODO: Check if the event is already full
+                            participationsViewModel.addParticipation(Participation(appState.userId, eventId))
+                        },
+                        onSubscriptionCanceled = {eventId: Int ->
+                            participationsViewModel.deleteParticipation(Participation(appState.userId, eventId))
+                            eventsVm.updateEvent(Event(
+                                eventId = eventWithUsers.event.eventId,
+                                title = eventWithUsers.event.title,
+                                description = eventWithUsers.event.description,
+                                date = eventWithUsers.event.date,
+                                time = eventWithUsers.event.time,
+                                location = eventWithUsers.event.location,
+                                maxParticipants = eventWithUsers.event.maxParticipants,
+                                privacyType = eventWithUsers.event.privacyType,
+                                eventCreatorId = eventWithUsers.event.eventCreatorId,
+                                winnerId = null
+                            ))
+                        },
+                        onWinnerSelection = {userId: Int ->
+                            eventsVm.updateEvent(Event(
+                                eventId = eventWithUsers.event.eventId,
+                                title = eventWithUsers.event.title,
+                                description = eventWithUsers.event.description,
+                                date = eventWithUsers.event.date,
+                                time = eventWithUsers.event.time,
+                                location = eventWithUsers.event.location,
+                                maxParticipants = eventWithUsers.event.maxParticipants,
+                                privacyType = eventWithUsers.event.privacyType,
+                                eventCreatorId = eventWithUsers.event.eventCreatorId,
+                                winnerId = userId
+                            ))
+                        },
+                        loadParticipants = {
+                            isEventCoroutineFinished = false
+                            onQueryComplete(
+                                result = eventsVm.getEventWithUsersById(backStackEntry.arguments?.getInt("eventID") ?: -1),
+                                onComplete = {result: Any ->
+                                    eventWithUsers = result as EventWithUsers
+                                    isEventCoroutineFinished = true
+                                },
+                                checkResult = {result: Any? ->
+                                    result != null && result is EventWithUsers
+                                }
+                            )
+                            return@EventDetailsScreen eventWithUsers.participants
+                        }
+                    )
+                }
             }
         }
         with(OCGRoute.Settings) {

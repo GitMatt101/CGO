@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -38,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import androidx.navigation.NavHostController
+import com.example.cgo.data.database.entities.Event
 import com.example.cgo.data.database.entities.EventWithUsers
 import com.example.cgo.data.database.entities.User
 import com.example.cgo.ui.OCGRoute
@@ -47,10 +47,13 @@ import com.example.cgo.ui.composables.Size
 @Composable
 fun EventDetailsScreen(
     eventWithUsers: EventWithUsers,
+    eventCreator: User,
     loggedUserId: Int,
     navController: NavHostController,
     onSubscription: (Int) -> Unit,
-    onWinnerSelection: (Int) -> Unit
+    onSubscriptionCanceled: (Int) -> Unit,
+    onWinnerSelection: (Int) -> Unit,
+    loadParticipants: () -> List<User>
 ) {
     val context = LocalContext.current
 
@@ -84,7 +87,6 @@ fun EventDetailsScreen(
                 .padding(12.dp)
                 .fillMaxSize()
         ) {
-            Spacer(Modifier.size(16.dp))
             // TODO: Aggiungere la pfp dello user usando UserWithEvents
 //            val imageUri = Uri.parse(user.profilePicture)
 //            ImageWithPlaceholder(imageUri, Size.Large)
@@ -104,20 +106,61 @@ fun EventDetailsScreen(
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
                 style = MaterialTheme.typography.bodySmall
             )
-            Spacer(Modifier.size(8.dp))
-            ParticipantsList(eventWithUsers = eventWithUsers, loggedUserId = loggedUserId, navController = navController, onWinnerSelection = onWinnerSelection)
+            var isParticipant by remember { mutableStateOf(eventWithUsers.participants.find { participant: User -> participant.userId == loggedUserId } != null) }
+            var participants by remember { mutableStateOf(eventWithUsers.participants) }
+            if (!isParticipant) {
+                Button (
+                    onClick = {
+                        onSubscription(eventWithUsers.event.eventId)
+                        isParticipant = true
+                        participants = loadParticipants()
+                    }
+                ) {
+                    Text(text = "Participate")
+                }
+            } else {
+                Button(onClick = {
+                    onSubscriptionCanceled(eventWithUsers.event.eventId)
+                    isParticipant = false
+                    participants = loadParticipants()
+                }) {
+                    Text(text = "Cancel Participation")
+                }
+            }
+            ListItem(
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .padding(horizontal = 60.dp),
+                headlineContent = { Text(text = "[OWNER]") },
+                trailingContent = {
+                    Row {
+                        ImageWithPlaceholder(uri = eventCreator.profilePicture?.toUri(), size = Size.VerySmall)
+                        Text(
+                            modifier = Modifier
+                                .padding(start = 10.dp)
+                                .align(Alignment.CenterVertically),
+                            text = eventCreator.username
+                        )
+                    }
+                }
+            )
+            ParticipantsList (
+                event = eventWithUsers.event,
+                participants = participants,
+                loggedUserId = loggedUserId,
+                navController = navController,
+                onWinnerSelection = onWinnerSelection
+            )
             Spacer(Modifier.size(8.dp))
             // TODO: Aggiungere la mappa con la location dell'evento
-            Button(onClick = { onSubscription(eventWithUsers.event.eventId) }) {
-                Text(text = "Participate")
-            }
         }
     }
 }
 
 @Composable
 fun ParticipantsList (
-    eventWithUsers: EventWithUsers,
+    event: Event,
+    participants: List<User>,
     loggedUserId: Int,
     navController: NavHostController,
     onWinnerSelection: (Int) -> Unit
@@ -129,12 +172,12 @@ fun ParticipantsList (
     ) {
         Text(text = "Participants", fontWeight = FontWeight.Bold, modifier = Modifier.align(Alignment.CenterHorizontally))
         Spacer(Modifier.size(10.dp))
-        if (eventWithUsers.participants.isNotEmpty()) {
-            var winnerId by remember { mutableStateOf(eventWithUsers.event.winnerId) }
+        if (participants.isNotEmpty()) {
+            var winnerId by remember { mutableStateOf(event.winnerId) }
             LazyColumn (
                 modifier = Modifier.border(width = 2.dp, color = Color.DarkGray)
             ) {
-                items(eventWithUsers.participants) {user: User ->
+                items(participants) {user: User ->
                     ListItem(
                         modifier = Modifier.clickable(onClick = { navController.navigate(OCGRoute.Profile.buildRoute(user.userId)) }),
                         headlineContent = {
@@ -149,7 +192,7 @@ fun ParticipantsList (
                             }
                         },
                         trailingContent = {
-                            if (user.userId != winnerId && loggedUserId == eventWithUsers.event.eventCreatorId) {
+                            if (user.userId != winnerId && loggedUserId == event.eventCreatorId) {
                                 Button(
                                     modifier = Modifier.align(alignment = Alignment.End),
                                     onClick = {
