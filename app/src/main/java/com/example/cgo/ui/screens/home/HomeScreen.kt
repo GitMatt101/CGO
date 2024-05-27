@@ -20,7 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
-import com.example.cgo.data.database.entities.Event
+import com.example.cgo.data.database.entities.EventWithUsers
 import com.example.cgo.ui.OCGRoute
 import com.example.cgo.ui.controllers.EventsState
 
@@ -44,10 +44,10 @@ fun HomeScreen(
             LazyColumn(
                 modifier = Modifier.padding(contentPadding)
             ) {
-                items(state.events) { event ->
+                items(state.eventsWithUsers) { eventWithUsers ->
                     EventItem(
-                        event,
-                        onClick = { navController.navigate(OCGRoute.EventDetails.buildRoute(event.eventId)) }
+                        eventWithUsers,
+                        onClick = { navController.navigate(OCGRoute.EventDetails.buildRoute(eventWithUsers.event.eventId)) }
                     )
                 }
             }
@@ -58,21 +58,20 @@ fun HomeScreen(
 }
 
 @Composable
-fun EventItem(event: Event, onClick: () -> Unit) {
-    // TODO: Migliorare la disposizione delle informazioni
+fun EventItem(eventWithUsers: EventWithUsers, onClick: () -> Unit) {
     ListItem(
         modifier = Modifier.clickable(onClick = onClick),
-        headlineContent = { Text(text = event.title) },
+        headlineContent = { Text(text = eventWithUsers.event.title) },
         supportingContent = {
             Column {
-                Text(text = "Dove: " + event.address + ", " + event.city)
-                Text(text = "Quando: " + event.date)
+                Text(text = "Location: " + eventWithUsers.event.address + ", " + eventWithUsers.event.city)
+                Text(text = "Date: " + eventWithUsers.event.date)
             }
         },
         trailingContent = {
             Column {
-                Text(text = "Ore: " + event.time)
-                Text(text = "Posti: " + event.maxParticipants)
+                Text(text = "Time: " + eventWithUsers.event.time)
+                Text(text = "Participants: " + eventWithUsers.participants.size + "/" + eventWithUsers.event.maxParticipants)
             }
         },
     )
