@@ -16,7 +16,6 @@ import com.example.cgo.ui.screens.registration.RegistrationViewModel
 import com.example.cgo.ui.controllers.EventsViewModel
 import com.example.cgo.ui.controllers.ParticipationsViewModel
 import com.example.cgo.ui.screens.addevent.AddEventViewModel
-import com.example.cgo.ui.screens.rankings.RankingsViewModel
 import com.example.cgo.ui.screens.settings.changeprofile.EditProfileViewModel
 import com.example.cgo.utils.LocationService
 import io.ktor.client.HttpClient
@@ -74,7 +73,6 @@ val appModule = module {
     viewModel { LoginViewModel() }
     viewModel { AddEventViewModel() }
     viewModel { EditProfileViewModel() }
-    viewModel { RankingsViewModel() }
 
     // Database entities view models
     viewModel { UsersViewModel(get()) }

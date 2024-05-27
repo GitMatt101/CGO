@@ -38,7 +38,6 @@ import com.example.cgo.ui.screens.eventdetails.EventDetailsScreen
 import com.example.cgo.ui.screens.home.HomeScreen
 import com.example.cgo.ui.screens.profile.ProfileScreen
 import com.example.cgo.ui.screens.rankings.RankingsScreen
-import com.example.cgo.ui.screens.rankings.RankingsViewModel
 import com.example.cgo.ui.screens.settings.SettingsScreen
 import com.example.cgo.ui.screens.settings.changeprofile.EditProfileScreen
 import com.example.cgo.ui.screens.settings.changeprofile.EditProfileViewModel
@@ -101,6 +100,7 @@ fun OCGNavGraph(
     modifier: Modifier = Modifier
 ) {
     val usersViewModel = koinViewModel<UsersViewModel>()
+    val usersState by usersViewModel.state.collectAsStateWithLifecycle()
     val eventsVm = koinViewModel<EventsViewModel>()
     val eventsState by eventsVm.state.collectAsStateWithLifecycle()
     val participationsViewModel = koinViewModel<ParticipationsViewModel>()
@@ -209,11 +209,8 @@ fun OCGNavGraph(
         }
         with(OCGRoute.Rankings) {
             composable(route) {
-                val rankingsViewModel = koinViewModel<RankingsViewModel>()
-                val state by rankingsViewModel.state.collectAsStateWithLifecycle()
                 RankingsScreen(
-                    state = state,
-                    actions = rankingsViewModel.actions,
+                    usersWithEvents = usersState.usersWithEvents,
                     navController = navController
                 )
             }

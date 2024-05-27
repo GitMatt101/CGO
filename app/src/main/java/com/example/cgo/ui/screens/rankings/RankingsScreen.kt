@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -30,17 +29,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.layout
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.TextUnit
-import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.cgo.data.database.entities.Event
 import com.example.cgo.data.database.entities.User
+import com.example.cgo.data.database.entities.UserWithEvents
 import com.example.cgo.ui.OCGRoute
 import com.example.cgo.ui.theme.Bronze
 import com.example.cgo.ui.theme.Gold
@@ -55,22 +50,20 @@ enum class Filter {
 
 @Composable
 fun RankingsScreen(
-    state: RankingsState,
-    actions: RankingsActions,
+    usersWithEvents: List<UserWithEvents>,
     navController: NavHostController
 ) {
-    actions.LoadUsers()
-    TabLayout(state = state, navController = navController)
+    TabLayout(usersWithEvents = usersWithEvents, navController = navController)
 }
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun TabLayout(state: RankingsState, navController: NavHostController) {
+fun TabLayout(usersWithEvents: List<UserWithEvents>, navController: NavHostController) {
     val pagerState = rememberPagerState(pageCount = { 3 })
 
     Column {
         Tabs(pagerState = pagerState)
-        TabsContent(pagerState = pagerState, rankingsState = state, navController = navController)
+        TabsContent(pagerState = pagerState, usersWithEvents = usersWithEvents, navController = navController)
     }
 }
 
@@ -106,22 +99,22 @@ fun Tabs(pagerState: PagerState) {
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun TabsContent(pagerState: PagerState, rankingsState: RankingsState, navController: NavHostController) {
+fun TabsContent(pagerState: PagerState, usersWithEvents: List<UserWithEvents>, navController: NavHostController) {
     HorizontalPager(state = pagerState) { page ->
         when (page) {
             0 -> TabContentScreen(
                 navController = navController,
-                usersWithEvents = rankingsState.users.map { Pair(it.user, it.events) },
+                usersWithEvents = usersWithEvents.map { Pair(it.user, it.events) },
                 text = "Participations"
             )
             1 -> TabContentScreen(
                 navController = navController,
-                usersWithEvents = rankingsState.users.map { Pair(it.user, it.wonEvents) },
+                usersWithEvents = usersWithEvents.map { Pair(it.user, it.wonEvents) },
                 text = "Events Won"
             )
             2 -> TabContentScreen(
                 navController = navController,
-                usersWithEvents = rankingsState.users.map { Pair(it.user, it.createdEvents) },
+                usersWithEvents = usersWithEvents.map { Pair(it.user, it.createdEvents) },
                 text = "Events Hosted"
             )
         }
