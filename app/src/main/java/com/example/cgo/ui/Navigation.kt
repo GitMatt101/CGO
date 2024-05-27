@@ -314,19 +314,21 @@ fun OCGNavGraph(
                         },
                         onSubscriptionCanceled = {eventId: Int ->
                             participationsViewModel.deleteParticipation(Participation(appState.userId, eventId))
-                            eventsVm.updateEvent(Event(
-                                eventId = eventWithUsers.event.eventId,
-                                title = eventWithUsers.event.title,
-                                description = eventWithUsers.event.description,
-                                date = eventWithUsers.event.date,
-                                time = eventWithUsers.event.time,
-                                address = eventWithUsers.event.address,
-                                city = eventWithUsers.event.city,
-                                maxParticipants = eventWithUsers.event.maxParticipants,
-                                privacyType = eventWithUsers.event.privacyType,
-                                eventCreatorId = eventWithUsers.event.eventCreatorId,
-                                winnerId = null
-                            ))
+                            if (eventWithUsers.event.winnerId == appState.userId) {
+                                eventsVm.updateEvent(Event(
+                                    eventId = eventWithUsers.event.eventId,
+                                    title = eventWithUsers.event.title,
+                                    description = eventWithUsers.event.description,
+                                    date = eventWithUsers.event.date,
+                                    time = eventWithUsers.event.time,
+                                    address = eventWithUsers.event.address,
+                                    city = eventWithUsers.event.city,
+                                    maxParticipants = eventWithUsers.event.maxParticipants,
+                                    privacyType = eventWithUsers.event.privacyType,
+                                    eventCreatorId = eventWithUsers.event.eventCreatorId,
+                                    winnerId = null
+                                ))
+                            }
                         },
                         onWinnerSelection = {userId: Int ->
                             eventsVm.updateEvent(Event(

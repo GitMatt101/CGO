@@ -24,6 +24,7 @@ import com.example.cgo.data.database.entities.Event
 import com.example.cgo.data.database.entities.User
 import com.example.cgo.ui.OCGRoute
 import com.example.cgo.ui.composables.ImageWithPlaceholder
+import com.example.cgo.ui.composables.NoItemPlaceholder
 import com.example.cgo.ui.composables.Size
 
 @Composable
@@ -74,7 +75,7 @@ fun MatchHistory(
                 }
             }
         } else {
-            Text(text = "No events found")
+            NoItemPlaceholder("No events found")
         }
     }
 }
