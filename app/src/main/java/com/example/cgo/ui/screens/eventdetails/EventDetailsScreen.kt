@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -32,11 +33,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import androidx.navigation.NavHostController
+import com.example.cgo.R
 import com.example.cgo.data.database.entities.Event
 import com.example.cgo.data.database.entities.EventWithUsers
 import com.example.cgo.data.database.entities.User
@@ -106,6 +109,16 @@ fun EventDetailsScreen(
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
                 style = MaterialTheme.typography.bodySmall
             )
+            Text(
+                eventWithUsers.event.address,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                style = MaterialTheme.typography.bodySmall
+            )
+            Text(
+                eventWithUsers.event.city,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                style = MaterialTheme.typography.bodySmall
+            )
             var isParticipant by remember { mutableStateOf(eventWithUsers.participants.find { participant: User -> participant.userId == loggedUserId } != null) }
             var participants by remember { mutableStateOf(eventWithUsers.participants) }
             if (!isParticipant) {
@@ -151,8 +164,6 @@ fun EventDetailsScreen(
                 navController = navController,
                 onWinnerSelection = onWinnerSelection
             )
-            Spacer(Modifier.size(8.dp))
-            // TODO: Aggiungere la mappa con la location dell'evento
         }
     }
 }
@@ -177,12 +188,21 @@ fun ParticipantsList (
             LazyColumn (
                 modifier = Modifier.border(width = 2.dp, color = Color.DarkGray)
             ) {
-                items(participants) {user: User ->
+                items(participants) { user: User ->
                     ListItem(
-                        modifier = Modifier.clickable(onClick = { navController.navigate(OCGRoute.Profile.buildRoute(user.userId)) }),
+                        modifier = Modifier.clickable(onClick = {
+                            navController.navigate(
+                                OCGRoute.Profile.buildRoute(
+                                    user.userId
+                                )
+                            )
+                        }),
                         headlineContent = {
                             Row {
-                                ImageWithPlaceholder(uri = user.profilePicture?.toUri(), size = Size.VerySmall)
+                                ImageWithPlaceholder(
+                                    uri = user.profilePicture?.toUri(),
+                                    size = Size.VerySmall
+                                )
                                 Text(
                                     modifier = Modifier
                                         .padding(start = 10.dp)
@@ -202,6 +222,11 @@ fun ParticipantsList (
                                 ) {
                                     Text(text = "Select Winner", fontSize = 15.sp)
                                 }
+                            } else if (user.userId == winnerId) {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.winner),
+                                    contentDescription = "Winner"
+                                )
                             }
                         }
                     )

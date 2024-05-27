@@ -65,7 +65,7 @@ fun EventItem(event: Event, onClick: () -> Unit) {
         headlineContent = { Text(text = event.title) },
         supportingContent = {
             Column {
-                Text(text = "Dove: " + event.location)
+                Text(text = "Dove: " + event.address + ", " + event.city)
                 Text(text = "Quando: " + event.date)
             }
         },

@@ -6,13 +6,15 @@ import com.example.cgo.data.database.entities.PrivacyType
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import okhttp3.Address
 
 data class AddEventState(
     val title: String = "",
     val description: String = "",
     val date: String = "",
     val time: String = "",
-    val location: String = "",
+    val address: String = "",
+    val city: String = "",
     val maxParticipants: Int = 0,
     val privacyType: PrivacyType,
 ) {
@@ -20,7 +22,8 @@ data class AddEventState(
         get() = title.isNotBlank()
                 && date.isNotBlank()
                 && time.isNotBlank()
-                && location.isNotBlank()
+                && address.isNotBlank()
+                && city.isNotBlank()
                 && maxParticipants > 0
                 && privacyType != PrivacyType.NONE
 
@@ -29,7 +32,8 @@ data class AddEventState(
         description = description,
         date = date,
         time = time,
-        location = location,
+        address = address,
+        city = city,
         maxParticipants = maxParticipants,
         privacyType = privacyType,
         eventCreatorId = eventCreatorId,
@@ -42,7 +46,8 @@ interface AddEventActions {
     fun setDescription(description: String)
     fun setDate(date: String)
     fun setTime(time: String)
-    fun setLocation(location: String)
+    fun setAddress(address: String)
+    fun setCity(city: String)
     fun setMaxParticipants(maxParticipants: Int)
     fun setPrivacyType(privacyType: PrivacyType)
 }
@@ -64,8 +69,11 @@ class AddEventViewModel : ViewModel() {
         override fun setTime(time: String) =
             _state.update { it.copy(time = time) }
 
-        override fun setLocation(location: String) =
-            _state.update { it.copy(location = location) }
+        override fun setAddress(address: String) =
+            _state.update { it.copy(address = address) }
+
+        override fun setCity(city: String) =
+            _state.update { it.copy(city = city) }
 
         override fun setMaxParticipants(maxParticipants: Int) =
             _state.update { it.copy(maxParticipants = maxParticipants) }

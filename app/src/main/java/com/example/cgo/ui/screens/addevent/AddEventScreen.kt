@@ -93,8 +93,13 @@ fun AddEventScreen(
                             showSnackbar = true
                         }
 
-                        state.location.isBlank() -> {
-                            snackbarMessage = "Please enter a location"
+                        state.address.isBlank() -> {
+                            snackbarMessage = "Please enter an address"
+                            showSnackbar = true
+                        }
+
+                        state.city.isBlank() -> {
+                            snackbarMessage = "Please enter a city"
                             showSnackbar = true
                         }
 
@@ -140,22 +145,46 @@ fun AddEventScreen(
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Default)
             )
-            CustomDatePicker(
-                date = state.date,
-                actions = actions
-            )
-            CustomTimePicker(
-                time = state.time,
-                actions = actions
-            )
-            // TODO: Add location picker
-            OutlinedTextField(
-                value = state.location,
-                onValueChange = actions::setLocation,
-                label = { Text("Location") },
+            Row(
                 modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
-            )
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                CustomDatePicker(
+                    date = state.date,
+                    actions = actions,
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(end = 8.dp),
+                )
+                CustomTimePicker(
+                    time = state.time,
+                    actions = actions,
+                    modifier = Modifier
+                        .weight(1f)
+                )
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                OutlinedTextField(
+                    value = state.address,
+                    onValueChange = actions::setAddress,
+                    label = { Text("Address") },
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(end = 8.dp),
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
+                )
+                OutlinedTextField(
+                    value = state.city,
+                    onValueChange = actions::setCity,
+                    label = { Text("City") },
+                    modifier = Modifier
+                        .weight(1f),
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
+                )
+            }
             OutlinedTextField(
                 value = if (state.maxParticipants == 0) "" else state.maxParticipants.toString(),
                 onValueChange = { actions.setMaxParticipants(it.toIntOrNull() ?: 0) },
@@ -188,7 +217,8 @@ fun AddEventScreen(
 @Composable
 fun CustomTimePicker(
     time: String,
-    actions: AddEventActions
+    actions: AddEventActions,
+    modifier: Modifier = Modifier
 ) {
     val timeState = rememberTimePickerState()
     var isTimePickerVisible by remember { mutableStateOf(false) }
@@ -197,8 +227,7 @@ fun CustomTimePicker(
         value = time,
         onValueChange = {},
         label = { Text("Time") },
-        modifier = Modifier
-            .fillMaxWidth()
+        modifier = modifier
             .clickable { isTimePickerVisible = false },
         readOnly = true,
         interactionSource = remember { MutableInteractionSource() }
@@ -291,7 +320,8 @@ fun TimePickerDialog(
 @Composable
 fun CustomDatePicker(
     date: String,
-    actions: AddEventActions
+    actions: AddEventActions,
+    modifier: Modifier = Modifier
 ) {
     val dateState = rememberDatePickerState(initialDisplayMode = DisplayMode.Picker)
     var isDatePickerVisible by remember { mutableStateOf(false) }
@@ -300,8 +330,7 @@ fun CustomDatePicker(
         value = date,
         onValueChange = {},
         label = { Text("Date") },
-        modifier = Modifier
-            .fillMaxWidth()
+        modifier = modifier
             .onFocusChanged { isDatePickerVisible = false },
         readOnly = true,
         interactionSource = remember { MutableInteractionSource() }

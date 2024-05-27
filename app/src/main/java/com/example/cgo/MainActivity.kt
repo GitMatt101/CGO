@@ -1,5 +1,6 @@
 package com.example.cgo
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -24,17 +25,23 @@ import com.example.cgo.ui.composables.MenuBar
 import com.example.cgo.ui.controllers.AppViewModel
 import com.example.cgo.ui.theme.CGOTheme
 import com.example.cgo.ui.theme.Theme
+import com.example.cgo.utils.LocationService
+import org.koin.android.ext.android.get
 import org.koin.androidx.compose.koinViewModel
+
+@SuppressLint("StaticFieldLeak")
+private lateinit var locationService: LocationService
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        locationService = get<LocationService>()
         setContent {
             val settingsViewModel = koinViewModel<AppViewModel>()
             val state by settingsViewModel.state.collectAsStateWithLifecycle()
 
-            CGOTheme (
+            CGOTheme(
                 darkTheme = when (state.theme) {
                     Theme.Light -> false
                     Theme.Dark -> true
@@ -78,5 +85,15 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        locationService.pauseLocationRequest()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        locationService.resumeLocationRequest()
     }
 }
