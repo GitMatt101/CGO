@@ -31,7 +31,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.koin.androidx.compose.koinViewModel
 import com.example.cgo.ui.controllers.EventsViewModel
 import com.example.cgo.ui.controllers.ParticipationsViewModel
-import com.example.cgo.ui.screens.search.SearchScreen
 import com.example.cgo.ui.screens.eventmap.EventMapScreen
 import com.example.cgo.ui.screens.addevent.AddEventScreen
 import com.example.cgo.ui.screens.addevent.AddEventViewModel
@@ -39,6 +38,7 @@ import com.example.cgo.ui.screens.eventdetails.EventDetailsScreen
 import com.example.cgo.ui.screens.home.HomeScreen
 import com.example.cgo.ui.screens.profile.ProfileScreen
 import com.example.cgo.ui.screens.rankings.RankingsScreen
+import com.example.cgo.ui.screens.search.SearchScreen
 import com.example.cgo.ui.screens.settings.SettingsScreen
 import com.example.cgo.ui.screens.settings.changeprofile.EditProfileScreen
 import com.example.cgo.ui.screens.settings.changeprofile.EditProfileViewModel
