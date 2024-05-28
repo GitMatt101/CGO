@@ -77,12 +77,15 @@ fun EventMapScreen(
     }
 
     LaunchedEffect(locationService.coordinates, locationService.isLocationEnabled) {
+        mapView?.overlays?.removeAll { it is Marker }
+
         if (locationService.isLocationEnabled == true) {
             locationService.coordinates?.let {
                 lat = it.latitude
                 lon = it.longitude
                 mapView?.controller?.setCenter(GeoPoint(lat, lon))
                 mapView?.controller?.setZoom(15.0)
+
 
                 val myPosition = Marker(mapView).apply {
                     position = GeoPoint(lat, lon)
@@ -92,11 +95,14 @@ fun EventMapScreen(
                 mapView?.overlays?.add(myPosition)
             }
         } else {
-            mapView?.overlays?.removeIf { it is Marker }
+            mapView?.overlays?.removeAll { it is Marker }
         }
 
         eventsState.events.forEach { event ->
-            osmDataSource.getPlaceByEventLocation(event.address.replace(" ", "+"), event.city.replace(" ", "+")).forEach { place ->
+            osmDataSource.getPlaceByEventLocation(
+                event.address.replace(" ", "+"),
+                event.city.replace(" ", "+")
+            ).forEach { place ->
                 val eventMarker = Marker(mapView).apply {
                     position = GeoPoint(place.latitude, place.longitude)
                     setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
