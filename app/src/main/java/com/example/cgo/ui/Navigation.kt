@@ -31,6 +31,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.koin.androidx.compose.koinViewModel
 import com.example.cgo.ui.controllers.EventsViewModel
 import com.example.cgo.ui.controllers.ParticipationsViewModel
+import com.example.cgo.ui.screens.search.SearchScreen
 import com.example.cgo.ui.screens.eventmap.EventMapScreen
 import com.example.cgo.ui.screens.addevent.AddEventScreen
 import com.example.cgo.ui.screens.addevent.AddEventViewModel
@@ -146,7 +147,7 @@ fun OCGNavGraph(
                                             }
                                         }
                                 },
-                                checkResult = {result: Any? ->
+                                checkResult = { result: Any? ->
                                     result != null && result is User
                                 }
                             )
@@ -192,7 +193,11 @@ fun OCGNavGraph(
         }
         with(OCGRoute.Search) {
             composable(route) {
-                // TODO: Open search screen
+                SearchScreen(
+                    eventsState = eventsState,
+                    usersState = usersState,
+                    navController = navController
+                )
             }
         }
         with(OCGRoute.AddEvent) {
@@ -218,85 +223,106 @@ fun OCGNavGraph(
         with(OCGRoute.Profile) {
             composable(route, arguments) { backStackEntry: NavBackStackEntry ->
                 // Create temporary user (also useful in case of error while fetching data from Database)
-                var userWithEvents by remember { mutableStateOf(UserWithEvents(
-                        user = User(
-                            userId = -1,
-                            username = "",
-                            email = "",
-                            password = "",
-                            profilePicture = null,
-                            gamesWon = -1
-                        ),
-                        events = emptyList(),
-                        wonEvents = emptyList(),
-                        createdEvents = emptyList()
-                    ))
+                var userWithEvents by remember {
+                    mutableStateOf(
+                        UserWithEvents(
+                            user = User(
+                                userId = -1,
+                                username = "",
+                                email = "",
+                                password = "",
+                                profilePicture = null,
+                                gamesWon = -1
+                            ),
+                            events = emptyList(),
+                            wonEvents = emptyList(),
+                            createdEvents = emptyList()
+                        )
+                    )
                 }
                 // Variable used to check if the coroutine is finished
                 var isCoroutineFinished by remember { mutableStateOf(false) }
 
                 if (backStackEntry.arguments?.getInt("userId") != -1) {
                     onQueryComplete(
-                        result = usersViewModel.getUserWithEventsById(backStackEntry.arguments?.getInt("userId") ?: -1),
-                        onComplete = {result: Any ->
+                        result = usersViewModel.getUserWithEventsById(
+                            backStackEntry.arguments?.getInt(
+                                "userId"
+                            ) ?: -1
+                        ),
+                        onComplete = { result: Any ->
                             userWithEvents = result as UserWithEvents
                             isCoroutineFinished = true
                         },
-                        checkResult = {result: Any? ->
+                        checkResult = { result: Any? ->
                             result != null && result is UserWithEvents
                         }
                     )
                     if (isCoroutineFinished) {
-                        ProfileScreen(user = userWithEvents.user, events = userWithEvents.events, navController = navController)
+                        ProfileScreen(
+                            user = userWithEvents.user,
+                            events = userWithEvents.events,
+                            navController = navController
+                        )
                     }
                 }
             }
         }
         with(OCGRoute.EventDetails) {
             composable(route, arguments) { backStackEntry ->
-                var eventWithUsers by remember { mutableStateOf(EventWithUsers(
-                    event = Event(
-                        eventId = -1,
-                        title = "",
-                        description = "",
-                        date = "",
-                        time = "",
-                        address = "",
-                        city = "",
-                        maxParticipants = -1,
-                        privacyType = PrivacyType.NONE,
-                        eventCreatorId = -1,
-                        winnerId = null
-                    ),
-                    participants = emptyList()
-                )) }
-                var user by remember { mutableStateOf(User(
-                    userId = -1,
-                    username = "",
-                    email = "",
-                    password = "",
-                    profilePicture = null,
-                    gamesWon = -1
-                )) }
+                var eventWithUsers by remember {
+                    mutableStateOf(
+                        EventWithUsers(
+                            event = Event(
+                                eventId = -1,
+                                title = "",
+                                description = "",
+                                date = "",
+                                time = "",
+                                address = "",
+                                city = "",
+                                maxParticipants = -1,
+                                privacyType = PrivacyType.NONE,
+                                eventCreatorId = -1,
+                                winnerId = null
+                            ),
+                            participants = emptyList()
+                        )
+                    )
+                }
+                var user by remember {
+                    mutableStateOf(
+                        User(
+                            userId = -1,
+                            username = "",
+                            email = "",
+                            password = "",
+                            profilePicture = null,
+                            gamesWon = -1
+                        )
+                    )
+                }
                 var isEventCoroutineFinished by remember { mutableStateOf(false) }
                 var isUserCoroutineFinished by remember { mutableStateOf(false) }
                 onQueryComplete(
-                    result = eventsVm.getEventWithUsersById(backStackEntry.arguments?.getInt("eventID") ?: -1),
-                    onComplete = {result: Any ->
+                    result = eventsVm.getEventWithUsersById(
+                        backStackEntry.arguments?.getInt("eventID") ?: -1
+                    ),
+                    onComplete = { result: Any ->
                         eventWithUsers = result as EventWithUsers
                         isEventCoroutineFinished = true
                     },
-                    checkResult = {result: Any? ->
+                    checkResult = { result: Any? ->
                         result != null && result is EventWithUsers
                     }
                 )
                 onQueryComplete(
                     result = usersViewModel.getUserInfo(eventWithUsers.event.eventCreatorId),
-                    onComplete = {result: Any ->
+                    onComplete = { result: Any ->
                         user = result as User
                         isUserCoroutineFinished = true
                     },
-                    checkResult = {result: Any? ->
+                    checkResult = { result: Any? ->
                         result != null && result is User
                     }
                 )
@@ -307,12 +333,41 @@ fun OCGNavGraph(
                         navController = navController,
                         loggedUserId = appState.userId,
                         onSubscription = { eventId: Int ->
-                            participationsViewModel.addParticipation(Participation(appState.userId, eventId))
+                            participationsViewModel.addParticipation(
+                                Participation(
+                                    appState.userId,
+                                    eventId
+                                )
+                            )
                         },
-                        onSubscriptionCanceled = {eventId: Int ->
-                            participationsViewModel.deleteParticipation(Participation(appState.userId, eventId))
+                        onSubscriptionCanceled = { eventId: Int ->
+                            participationsViewModel.deleteParticipation(
+                                Participation(
+                                    appState.userId,
+                                    eventId
+                                )
+                            )
                             if (eventWithUsers.event.winnerId == appState.userId) {
-                                eventsVm.updateEvent(Event(
+                                eventsVm.updateEvent(
+                                    Event(
+                                        eventId = eventWithUsers.event.eventId,
+                                        title = eventWithUsers.event.title,
+                                        description = eventWithUsers.event.description,
+                                        date = eventWithUsers.event.date,
+                                        time = eventWithUsers.event.time,
+                                        address = eventWithUsers.event.address,
+                                        city = eventWithUsers.event.city,
+                                        maxParticipants = eventWithUsers.event.maxParticipants,
+                                        privacyType = eventWithUsers.event.privacyType,
+                                        eventCreatorId = eventWithUsers.event.eventCreatorId,
+                                        winnerId = null
+                                    )
+                                )
+                            }
+                        },
+                        onWinnerSelection = { userId: Int ->
+                            eventsVm.updateEvent(
+                                Event(
                                     eventId = eventWithUsers.event.eventId,
                                     title = eventWithUsers.event.title,
                                     description = eventWithUsers.event.description,
@@ -323,34 +378,23 @@ fun OCGNavGraph(
                                     maxParticipants = eventWithUsers.event.maxParticipants,
                                     privacyType = eventWithUsers.event.privacyType,
                                     eventCreatorId = eventWithUsers.event.eventCreatorId,
-                                    winnerId = null
-                                ))
-                            }
-                        },
-                        onWinnerSelection = {userId: Int ->
-                            eventsVm.updateEvent(Event(
-                                eventId = eventWithUsers.event.eventId,
-                                title = eventWithUsers.event.title,
-                                description = eventWithUsers.event.description,
-                                date = eventWithUsers.event.date,
-                                time = eventWithUsers.event.time,
-                                address = eventWithUsers.event.address,
-                                city = eventWithUsers.event.city,
-                                maxParticipants = eventWithUsers.event.maxParticipants,
-                                privacyType = eventWithUsers.event.privacyType,
-                                eventCreatorId = eventWithUsers.event.eventCreatorId,
-                                winnerId = userId
-                            ))
+                                    winnerId = userId
+                                )
+                            )
                         },
                         loadParticipants = {
                             isEventCoroutineFinished = false
                             onQueryComplete(
-                                result = eventsVm.getEventWithUsersById(backStackEntry.arguments?.getInt("eventID") ?: -1),
-                                onComplete = {result: Any ->
+                                result = eventsVm.getEventWithUsersById(
+                                    backStackEntry.arguments?.getInt(
+                                        "eventID"
+                                    ) ?: -1
+                                ),
+                                onComplete = { result: Any ->
                                     eventWithUsers = result as EventWithUsers
                                     isEventCoroutineFinished = true
                                 },
-                                checkResult = {result: Any? ->
+                                checkResult = { result: Any? ->
                                     result != null && result is EventWithUsers
                                 }
                             )
