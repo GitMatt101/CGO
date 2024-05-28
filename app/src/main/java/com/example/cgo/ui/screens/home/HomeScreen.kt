@@ -77,11 +77,11 @@ fun EventItem(eventWithUsers: EventWithUsers, onClick: () -> Unit) {
             Column {
                 Text(text = "Location: " + eventWithUsers.event.address + ", " + eventWithUsers.event.city)
                 Text(text = "Date: " + eventWithUsers.event.date)
+                Text(text = "Time: " + eventWithUsers.event.time)
             }
         },
         trailingContent = {
             Column {
-                Text(text = "Time: " + eventWithUsers.event.time)
                 Text(text = "Participants: " + eventWithUsers.participants.size + "/" + eventWithUsers.event.maxParticipants)
             }
         },

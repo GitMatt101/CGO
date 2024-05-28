@@ -123,6 +123,7 @@ fun EventMapScreen(
                 MapView(context).apply {
                     setMultiTouchControls(true)
                     controller.setZoom(5.0)
+                    minZoomLevel = 3.0
                     mapView = this
                 }
             },

@@ -41,12 +41,6 @@ import com.example.cgo.ui.theme.Gold
 import com.example.cgo.ui.theme.Silver
 import kotlinx.coroutines.launch
 
-enum class Filter {
-    EventsPlayed,
-    EventsWon,
-    EventsHosted
-}
-
 @Composable
 fun RankingsScreen(
     usersWithEvents: List<UserWithEvents>,
@@ -69,7 +63,7 @@ fun TabLayout(usersWithEvents: List<UserWithEvents>, navController: NavHostContr
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun Tabs(pagerState: PagerState) {
-    val list = Filter.entries.toList()
+    val list = listOf("Events played", "Events won", "Events hosted")
     val scope = rememberCoroutineScope()
     TabRow(
         selectedTabIndex = pagerState.currentPage,
@@ -81,7 +75,7 @@ fun Tabs(pagerState: PagerState) {
             Tab(
                 text = {
                     Text(
-                        list[index].toString(),
+                        list[index],
                         fontWeight = if (pagerState.currentPage == index) FontWeight.Bold else FontWeight.Normal
                     )
                 },
