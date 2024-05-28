@@ -65,6 +65,7 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavHostController
 import com.example.cgo.data.database.entities.PrivacyType
 import java.time.LocalDate
+import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
 @Composable
@@ -94,8 +95,24 @@ fun AddEventScreen(
                             showSnackbar = true
                         }
 
+                        LocalDate.parse(
+                            state.date,
+                            DateTimeFormatter.ofPattern("dd/MM/yyyy")
+                        ) < LocalDate.now() -> {
+                            snackbarMessage = "Date cannot be in the past"
+                            showSnackbar = true
+                        }
+
                         state.time.isBlank() -> {
                             snackbarMessage = "Please select a time"
+                            showSnackbar = true
+                        }
+
+                        (LocalDate.parse(
+                            state.date,
+                            DateTimeFormatter.ofPattern("dd/MM/yyyy")
+                        ) == LocalDate.now()) && (LocalTime.parse(state.time) <= LocalTime.now()) -> {
+                            snackbarMessage = "Time cannot be in the past"
                             showSnackbar = true
                         }
 
