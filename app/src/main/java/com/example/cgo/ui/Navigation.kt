@@ -327,7 +327,25 @@ fun OCGNavGraph(
                                 ))
                             }
                         },
-                        onWinnerSelection = {userId: Int ->
+                        onWinnerSelection = {winner: User, previousWinner: User? ->
+                            previousWinner?.let {
+                                usersViewModel.updateUser(User(
+                                    userId = previousWinner.userId,
+                                    username = previousWinner.username,
+                                    email = previousWinner.email,
+                                    password = previousWinner.password,
+                                    profilePicture = previousWinner.profilePicture,
+                                    gamesWon = previousWinner.gamesWon - 1
+                                ))
+                            }
+                            usersViewModel.updateUser(User(
+                                userId = winner.userId,
+                                username = winner.username,
+                                email = winner.email,
+                                password = winner.password,
+                                profilePicture = winner.profilePicture,
+                                gamesWon = winner.gamesWon + 1
+                            ))
                             eventsVm.updateEvent(Event(
                                 eventId = eventWithUsers.event.eventId,
                                 title = eventWithUsers.event.title,
@@ -339,7 +357,7 @@ fun OCGNavGraph(
                                 maxParticipants = eventWithUsers.event.maxParticipants,
                                 privacyType = eventWithUsers.event.privacyType,
                                 eventCreatorId = eventWithUsers.event.eventCreatorId,
-                                winnerId = userId
+                                winnerId = winner.userId
                             ))
                         },
                         loadParticipants = {
