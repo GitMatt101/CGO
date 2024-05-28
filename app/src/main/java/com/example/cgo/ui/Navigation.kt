@@ -165,28 +165,29 @@ fun OCGNavGraph(
                     state = state,
                     actions = registrationViewModel.actions,
                     onSubmit = {
-                        usersViewModel.addUser(state.createUser())
-                        onQueryComplete(
-                            usersViewModel.getUserOnLogin(
-                                email = state.email,
-                                password = state.password
-                            ),
-                            onComplete = { result: Any ->
-                                appViewModel.changeUserId((result as User).userId)
-                                    .invokeOnCompletion {
-                                        if (it == null) {
-                                            navController.popBackStack(
-                                                OCGRoute.Login.route,
-                                                inclusive = true
-                                            )
-                                            navController.navigate(OCGRoute.Home.route)
+                        usersViewModel.addUser(state.createUser()).invokeOnCompletion {
+                            onQueryComplete(
+                                usersViewModel.getUserOnLogin(
+                                    email = state.email,
+                                    password = state.password
+                                ),
+                                onComplete = { result: Any ->
+                                    appViewModel.changeUserId((result as User).userId)
+                                        .invokeOnCompletion {
+                                            if (it == null) {
+                                                navController.popBackStack(
+                                                    OCGRoute.Login.route,
+                                                    inclusive = true
+                                                )
+                                                navController.navigate(OCGRoute.Home.route)
+                                            }
                                         }
-                                    }
-                            },
-                            checkResult = {
-                                it is User && it.userId != -1
-                            }
-                        )
+                                },
+                                checkResult = { result: Any? ->
+                                    result != null && result is User
+                                }
+                            )
+                        }
                     }
                 )
             }

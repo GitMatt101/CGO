@@ -58,7 +58,7 @@ fun AppBar(
                 IconButton(onClick = {
                     appViewModel.changeUserId(-1).invokeOnCompletion {
                         if (it == null) {
-                            navController.popBackStack(OCGRoute.Profile.route, inclusive = true)
+                            OCGRoute.routes.forEach { route: OCGRoute -> navController.popBackStack(route.route, true) }
                             navController.navigate(OCGRoute.Login.route)
                         }
                     }
