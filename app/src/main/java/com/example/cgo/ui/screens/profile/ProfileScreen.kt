@@ -42,7 +42,6 @@ fun ProfileScreen(
         Spacer(Modifier.size(10.dp))
         Text(text = user.username)
         Spacer(Modifier.size(10.dp))
-        // TODO: Fix games won
         Text(text = "Games won: " + user.gamesWon)
         HorizontalDivider()
         MatchHistory(events = events, user = user, navController = navController)

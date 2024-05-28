@@ -33,7 +33,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import com.example.cgo.data.database.entities.Event
 import com.example.cgo.data.database.entities.User
 import com.example.cgo.data.database.entities.UserWithEvents
 import com.example.cgo.ui.OCGRoute
@@ -104,17 +103,17 @@ fun TabsContent(pagerState: PagerState, usersWithEvents: List<UserWithEvents>, n
         when (page) {
             0 -> TabContentScreen(
                 navController = navController,
-                usersWithEvents = usersWithEvents.map { Pair(it.user, it.events) },
+                users = usersWithEvents.map { Pair(it.user, it.events.size) }.sortedBy { -it.second },
                 text = "Participations"
             )
             1 -> TabContentScreen(
                 navController = navController,
-                usersWithEvents = usersWithEvents.map { Pair(it.user, it.wonEvents) },
+                users = usersWithEvents.map { Pair(it.user, it.user.gamesWon) }.sortedBy { -it.second },
                 text = "Events Won"
             )
             2 -> TabContentScreen(
                 navController = navController,
-                usersWithEvents = usersWithEvents.map { Pair(it.user, it.createdEvents) },
+                users = usersWithEvents.map { Pair(it.user, it.createdEvents.size) }.sortedBy { -it.second },
                 text = "Events Hosted"
             )
         }
@@ -122,7 +121,7 @@ fun TabsContent(pagerState: PagerState, usersWithEvents: List<UserWithEvents>, n
 }
 
 @Composable
-fun TabContentScreen(navController: NavHostController, usersWithEvents: List<Pair<User, List<Event>>>, text: String) {
+fun TabContentScreen(navController: NavHostController, users: List<Pair<User, Int>>, text: String) {
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -130,9 +129,8 @@ fun TabContentScreen(navController: NavHostController, usersWithEvents: List<Pai
     ) {
         LazyColumn {
             var count = 1
-            items(usersWithEvents.sortedBy { -it.second.size }) {userWithEvents ->
-                val user: User = userWithEvents.first
-                val events: List<Event> = userWithEvents.second
+            items(users) {userWithNumber ->
+                val user: User = userWithNumber.first
                 ListItem(
                     modifier = Modifier.clickable(onClick = {
                         navController.navigate(OCGRoute.Profile.buildRoute(user.userId))
@@ -191,7 +189,7 @@ fun TabContentScreen(navController: NavHostController, usersWithEvents: List<Pai
                             Text(text = user.username, modifier = Modifier.padding(start = 10.dp))
                         }
                     },
-                    trailingContent = { Text(text = "$text: ${events.size}") }
+                    trailingContent = { Text(text = "$text: ${userWithNumber.second}") }
                 )
                 count++
                 HorizontalDivider()

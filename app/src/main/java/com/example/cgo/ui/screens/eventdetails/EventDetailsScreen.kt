@@ -36,7 +36,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
@@ -57,7 +56,7 @@ fun EventDetailsScreen(
     navController: NavHostController,
     onSubscription: (Int) -> Unit,
     onSubscriptionCanceled: (Int) -> Unit,
-    onWinnerSelection: (Int) -> Unit,
+    onWinnerSelection: (User, User?) -> Unit,
     loadParticipants: () -> List<User>
 ) {
     val context = LocalContext.current
@@ -170,7 +169,7 @@ fun ParticipantsList (
     participants: List<User>,
     loggedUserId: Int,
     navController: NavHostController,
-    onWinnerSelection: (Int) -> Unit
+    onWinnerSelection: (User, User?) -> Unit
 ) {
     Column (
         modifier = Modifier
@@ -212,7 +211,8 @@ fun ParticipantsList (
                                 Button(
                                     modifier = Modifier.align(alignment = Alignment.End),
                                     onClick = {
-                                        onWinnerSelection(user.userId)
+                                        val previousWinner = participants.find { it.userId == event.winnerId }
+                                        onWinnerSelection(user, previousWinner)
                                         winnerId = user.userId
                                     }
                                 ) {
