@@ -115,9 +115,13 @@ fun OCGNavGraph(
     ) {
         with(OCGRoute.Home) {
             composable(route) {
+                val createdEvents = eventsState.eventsWithUsers.filter { it.event.eventCreatorId == appState.userId }
+                val publicEvents = eventsState.eventsWithUsers.filter { it.event.privacyType == PrivacyType.PUBLIC }
+                println(createdEvents.size)
                 HomeScreen(
-                    eventsState,
-                    navController
+                    publicEvents = publicEvents,
+                    createdEvents = createdEvents,
+                    navController = navController,
                 )
             }
         }

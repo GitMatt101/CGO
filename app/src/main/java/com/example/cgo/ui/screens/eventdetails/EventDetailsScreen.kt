@@ -66,7 +66,13 @@ fun EventDetailsScreen(
         val sendIntent = Intent().apply {
             action = Intent.ACTION_SEND
             type = "text/plain"
-            putExtra(Intent.EXTRA_TEXT, eventWithUsers.event.title)
+            putExtra(
+                Intent.EXTRA_TEXT,
+                "Partecipa all'evento: "
+                        + eventWithUsers.event.title
+                        + " inserendo il codice "
+                        + eventWithUsers.event.eventId
+                        + " su OCG!")
         }
         val shareIntent = Intent.createChooser(sendIntent, "Share event")
         if (shareIntent.resolveActivity(context.packageManager) != null) {
