@@ -43,6 +43,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.sp
+import com.example.cgo.data.database.entities.PrivacyType
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -89,7 +90,7 @@ fun ProfileScreen(
             Spacer(Modifier.size(15.dp))
         }
         HorizontalDivider()
-        MatchHistory(events = events.take(20), user = user, navController = navController)
+        MatchHistory(events = events.take(20).filter { it.privacyType == PrivacyType.PUBLIC }, user = user, navController = navController)
     }
 }
 
@@ -99,10 +100,16 @@ fun MatchHistory(
     user: User,
     navController: NavHostController
 ) {
-    Column (
-        modifier = Modifier.padding(horizontal = 10.dp, vertical = 10.dp)
+    Column(
+        modifier = Modifier
+            .padding(horizontal = 10.dp)
+            .padding(bottom = 10.dp)
     ) {
-        Text(text = "Match History", fontWeight = FontWeight.Bold, modifier = Modifier.align(Alignment.CenterHorizontally))
+        Text(
+            text = "Match History",
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        )
         Spacer(Modifier.size(10.dp))
         if (events.isNotEmpty()) {
             Column (
