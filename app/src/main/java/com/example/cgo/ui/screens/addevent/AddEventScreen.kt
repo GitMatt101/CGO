@@ -126,8 +126,8 @@ fun AddEventScreen(
                             showSnackbar = true
                         }
 
-                        state.maxParticipants <= 0 -> {
-                            snackbarMessage = "Participants must be more than 0"
+                        state.maxParticipants <= 1 -> {
+                            snackbarMessage = "Participants must be more than 1"
                             showSnackbar = true
                         }
 
