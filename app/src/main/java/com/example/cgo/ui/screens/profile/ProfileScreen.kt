@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.navigation.NavHostController
 import com.example.cgo.data.database.entities.Event
+import com.example.cgo.data.database.entities.PrivacyType
 import com.example.cgo.data.database.entities.User
 import com.example.cgo.ui.OCGRoute
 import com.example.cgo.ui.composables.ImageWithPlaceholder
@@ -33,7 +34,7 @@ fun ProfileScreen(
     events: List<Event>,
     navController: NavHostController
 ) {
-    Column (
+    Column(
         verticalArrangement = Arrangement.spacedBy(12.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -54,23 +55,35 @@ fun MatchHistory(
     user: User,
     navController: NavHostController
 ) {
-    Column (
+    Column(
         modifier = Modifier
             .padding(horizontal = 10.dp)
             .padding(bottom = 10.dp)
     ) {
-        Text(text = "Match History", fontWeight = FontWeight.Bold, modifier = Modifier.align(Alignment.CenterHorizontally))
+        Text(
+            text = "Match History",
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        )
         Spacer(Modifier.size(10.dp))
         if (events.isNotEmpty()) {
-            LazyColumn (
+            LazyColumn(
                 modifier = Modifier.border(width = 2.dp, color = Color.DarkGray)
             ) {
                 items(events) { event ->
-                    EventItem(
-                        event = event,
-                        user = user,
-                        onClick = { navController.navigate(OCGRoute.EventDetails.buildRoute(event.eventId)) }
-                    )
+                    if (event.privacyType == PrivacyType.PUBLIC) {
+                        EventItem(
+                            event = event,
+                            user = user,
+                            onClick = {
+                                navController.navigate(
+                                    OCGRoute.EventDetails.buildRoute(
+                                        event.eventId
+                                    )
+                                )
+                            }
+                        )
+                    }
                 }
             }
         } else {

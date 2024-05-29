@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.cgo.data.database.entities.EventWithUsers
+import com.example.cgo.data.database.entities.PrivacyType
 import com.example.cgo.ui.OCGRoute
 import com.example.cgo.ui.composables.NoItemPlaceholder
 import com.example.cgo.ui.controllers.EventsState
@@ -56,10 +57,18 @@ fun HomeScreen(
                 )
             ) {
                 items(state.eventsWithUsers) { eventWithUsers ->
-                    EventItem(
-                        eventWithUsers,
-                        onClick = { navController.navigate(OCGRoute.EventDetails.buildRoute(eventWithUsers.event.eventId)) }
-                    )
+                    if (eventWithUsers.event.privacyType == PrivacyType.PUBLIC) {
+                        EventItem(
+                            eventWithUsers,
+                            onClick = {
+                                navController.navigate(
+                                    OCGRoute.EventDetails.buildRoute(
+                                        eventWithUsers.event.eventId
+                                    )
+                                )
+                            }
+                        )
+                    }
                 }
             }
         } else {
