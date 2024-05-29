@@ -148,7 +148,7 @@ fun TabContentScreen(navController: NavHostController, users: List<Pair<User, In
                                 )
                             }
                         }
-                        var textSize = 0
+                        var textSize = 15
                         if (count > 10)
                             textSize = 12
                         if (count > 100)
@@ -165,7 +165,7 @@ fun TabContentScreen(navController: NavHostController, users: List<Pair<User, In
                                     .background(color = Bronze, shape = CircleShape)
                                     .circleLayout(), color = Color.Black)
                                 else -> Text(
-                                    text = (count + 100).toString(),
+                                    text = count.toString(),
                                     modifier = Modifier
                                         .border(
                                             width = 2.dp,
