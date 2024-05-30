@@ -5,6 +5,7 @@ import android.net.Uri
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -33,6 +34,7 @@ import com.example.cgo.R
 import com.example.cgo.ui.composables.ImageWithPlaceholder
 import com.example.cgo.ui.composables.Size
 import com.example.cgo.utils.rememberCameraLauncher
+import com.example.cgo.utils.rememberGalleryLauncher
 import com.example.cgo.utils.rememberPermission
 
 @Composable
@@ -68,13 +70,15 @@ fun EditProfileScreen(
             cameraPermission.launchPermissionRequest()
     }
 
+    val galleryLauncher = rememberGalleryLauncher { imageUri -> actions.setProfilePicture(imageUri) }
+
     // UI
     Column (
         verticalArrangement = Arrangement.spacedBy(12.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .fillMaxSize()
-            .padding(vertical = 10.dp)
+            .padding(vertical = 10.dp, horizontal = 10.dp)
             .verticalScroll(rememberScrollState())
     ) {
         OutlinedTextField(
@@ -84,17 +88,32 @@ fun EditProfileScreen(
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(Modifier.size(10.dp))
-        Button(
-            onClick = ::takePicture,
-            contentPadding = ButtonDefaults.ButtonWithIconContentPadding,
-        ) {
-            Icon(
-                painterResource(id = R.drawable.camera),
-                contentDescription = "Camera icon",
-                modifier = Modifier.size(ButtonDefaults.IconSize)
-            )
+        Row {
+            Button(
+                onClick = ::takePicture,
+                contentPadding = ButtonDefaults.ButtonWithIconContentPadding,
+            ) {
+                Icon(
+                    painterResource(id = R.drawable.camera),
+                    contentDescription = "Camera icon",
+                    modifier = Modifier.size(ButtonDefaults.IconSize)
+                )
+                Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+                Text("Take a picture")
+            }
             Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-            Text("Take a picture")
+            Button(
+                onClick = { galleryLauncher.selectImage() },
+                contentPadding = ButtonDefaults.ButtonWithIconContentPadding,
+            ) {
+                Icon(
+                    painterResource(id = R.drawable.gallery),
+                    contentDescription = "Gallery icon",
+                    modifier = Modifier.size(ButtonDefaults.IconSize)
+                )
+                Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+                Text("Select Image")
+            }
         }
         if (state.profilePicture != Uri.EMPTY) {
             Spacer(Modifier.size(10.dp))
