@@ -115,9 +115,12 @@ fun OCGNavGraph(
     ) {
         with(OCGRoute.Home) {
             composable(route) {
+                if (appState.userId == null) {
+                    navigateAndClearBackstack(route, OCGRoute.Login.route, navController)
+                    return@composable
+                }
                 val createdEvents = eventsState.eventsWithUsers.filter { it.event.eventCreatorId == appState.userId }
                 val publicEvents = eventsState.eventsWithUsers.filter { it.event.privacyType == PrivacyType.PUBLIC }
-                println(createdEvents.size)
                 HomeScreen(
                     publicEvents = publicEvents,
                     createdEvents = createdEvents,
@@ -129,7 +132,7 @@ fun OCGNavGraph(
             composable(route) {
                 val loginViewModel = koinViewModel<LoginViewModel>()
                 val state by loginViewModel.state.collectAsStateWithLifecycle()
-                if (appState.userId != -1) {
+                if (appState.userId != null) {
                     navController.popBackStack()
                     navController.navigate(OCGRoute.Home.route)
                 } else {
@@ -198,6 +201,10 @@ fun OCGNavGraph(
         }
         with(OCGRoute.Search) {
             composable(route) {
+                if (appState.userId == null) {
+                    navigateAndClearBackstack(route, OCGRoute.Login.route, navController)
+                    return@composable
+                }
                 SearchScreen(
                     eventsState = eventsState,
                     usersState = usersState,
@@ -207,18 +214,26 @@ fun OCGNavGraph(
         }
         with(OCGRoute.AddEvent) {
             composable(route) {
+                if (appState.userId == null) {
+                    navigateAndClearBackstack(route, OCGRoute.Login.route, navController)
+                    return@composable
+                }
                 val addEventVm = koinViewModel<AddEventViewModel>()
                 val state by addEventVm.state.collectAsStateWithLifecycle()
                 AddEventScreen(
                     state = state,
                     actions = addEventVm.actions,
-                    onSubmit = { eventsVm.addEvent(state.toEvent(appState.userId)) },
+                    onSubmit = { eventsVm.addEvent(state.toEvent(appState.userId!!)) },
                     navController = navController
                 )
             }
         }
         with(OCGRoute.Rankings) {
             composable(route) {
+                if (appState.userId == null) {
+                    navigateAndClearBackstack(route, OCGRoute.Login.route, navController)
+                    return@composable
+                }
                 RankingsScreen(
                     usersWithEvents = usersState.usersWithEvents,
                     navController = navController
@@ -227,6 +242,10 @@ fun OCGNavGraph(
         }
         with(OCGRoute.Profile) {
             composable(route, arguments) { backStackEntry: NavBackStackEntry ->
+                if (appState.userId == null) {
+                    navigateAndClearBackstack(route, OCGRoute.Login.route, navController)
+                    return@composable
+                }
                 // Create temporary user (also useful in case of error while fetching data from Database)
                 var userWithEvents by remember {
                     mutableStateOf(
@@ -248,33 +267,35 @@ fun OCGNavGraph(
                 // Variable used to check if the coroutine is finished
                 var isCoroutineFinished by remember { mutableStateOf(false) }
 
-                if (backStackEntry.arguments?.getInt("userId") != -1) {
-                    onQueryComplete(
-                        result = usersViewModel.getUserWithEventsById(
-                            backStackEntry.arguments?.getInt(
-                                "userId"
-                            ) ?: -1
-                        ),
-                        onComplete = { result: Any ->
-                            userWithEvents = result as UserWithEvents
-                            isCoroutineFinished = true
-                        },
-                        checkResult = { result: Any? ->
-                            result != null && result is UserWithEvents
-                        }
-                    )
-                    if (isCoroutineFinished) {
-                        ProfileScreen(
-                            user = userWithEvents.user,
-                            events = userWithEvents.events,
-                            navController = navController
-                        )
+                onQueryComplete(
+                    result = usersViewModel.getUserWithEventsById(
+                        backStackEntry.arguments?.getInt(
+                            "userId"
+                        ) ?: -1
+                    ),
+                    onComplete = { result: Any ->
+                        userWithEvents = result as UserWithEvents
+                        isCoroutineFinished = true
+                    },
+                    checkResult = { result: Any? ->
+                        result != null && result is UserWithEvents
                     }
+                )
+                if (isCoroutineFinished) {
+                    ProfileScreen(
+                        user = userWithEvents.user,
+                        events = userWithEvents.events,
+                        navController = navController
+                    )
                 }
             }
         }
         with(OCGRoute.EventDetails) {
             composable(route, arguments) { backStackEntry ->
+                if (appState.userId == null) {
+                    navigateAndClearBackstack(route, OCGRoute.Login.route, navController)
+                    return@composable
+                }
                 var eventWithUsers by remember {
                     mutableStateOf(
                         EventWithUsers(
@@ -336,11 +357,11 @@ fun OCGNavGraph(
                         eventWithUsers,
                         eventCreator = user,
                         navController = navController,
-                        loggedUserId = appState.userId,
+                        loggedUserId = appState.userId!!,
                         onSubscription = { eventId: Int ->
                             participationsViewModel.addParticipation(
                                 Participation(
-                                    appState.userId,
+                                    appState.userId!!,
                                     eventId
                                 )
                             )
@@ -348,7 +369,7 @@ fun OCGNavGraph(
                         onSubscriptionCanceled = { eventId: Int ->
                             participationsViewModel.deleteParticipation(
                                 Participation(
-                                    appState.userId,
+                                    appState.userId!!,
                                     eventId
                                 )
                             )
@@ -427,6 +448,10 @@ fun OCGNavGraph(
         }
         with(OCGRoute.Settings) {
             composable(route) {
+                if (appState.userId == null) {
+                    navigateAndClearBackstack(route, OCGRoute.Login.route, navController)
+                    return@composable
+                }
                 SettingsScreen(
                     state = appState,
                     navController = navController,
@@ -436,6 +461,10 @@ fun OCGNavGraph(
         }
         with(OCGRoute.EditProfile) {
             composable(route) {
+                if (appState.userId == null) {
+                    navigateAndClearBackstack(route, OCGRoute.Login.route, navController)
+                    return@composable
+                }
                 // Create temporary user (also useful in case of error while fetching data from Database)
                 var user by remember {
                     mutableStateOf(
@@ -453,7 +482,7 @@ fun OCGNavGraph(
                 var isCoroutineFinished by remember { mutableStateOf(false) }
 
                 onQueryComplete(
-                    usersViewModel.getUserInfo(appState.userId),
+                    usersViewModel.getUserInfo(appState.userId!!),
                     onComplete = { result: Any ->
                         user = result as User
                         isCoroutineFinished = true
@@ -462,7 +491,7 @@ fun OCGNavGraph(
                         result != null && result is User
                     }
                 )
-                if (appState.userId != -1 && isCoroutineFinished) {
+                if (isCoroutineFinished) {
                     val editProfileViewModel = koinViewModel<EditProfileViewModel>()
                     val state by editProfileViewModel.state.collectAsStateWithLifecycle()
                     EditProfileScreen(
@@ -488,6 +517,10 @@ fun OCGNavGraph(
         }
         with(OCGRoute.EventsMap) {
             composable(route) {
+                if (appState.userId == null) {
+                    navigateAndClearBackstack(route, OCGRoute.Login.route, navController)
+                    return@composable
+                }
                 EventMapScreen(
                     eventsState = eventsState,
                     navController = navController
@@ -495,6 +528,14 @@ fun OCGNavGraph(
             }
         }
     }
+}
+
+fun navigateAndClearBackstack(currentRoute: String, destination: String, navController: NavHostController) {
+    navController.popBackStack(
+        route = currentRoute,
+        inclusive = true
+    )
+    navController.navigate(destination)
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)

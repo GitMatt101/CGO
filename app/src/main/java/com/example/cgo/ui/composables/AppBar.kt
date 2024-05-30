@@ -56,7 +56,7 @@ fun AppBar(
             if (currentRoute.route == OCGRoute.Settings.route) {
                 val appViewModel = koinViewModel<AppViewModel>()
                 IconButton(onClick = {
-                    appViewModel.changeUserId(-1).invokeOnCompletion {
+                    appViewModel.changeUserId(null).invokeOnCompletion {
                         if (it == null) {
                             OCGRoute.routes.forEach { route: OCGRoute -> navController.popBackStack(route.route, true) }
                             navController.navigate(OCGRoute.Login.route)

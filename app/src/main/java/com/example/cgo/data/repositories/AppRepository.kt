@@ -23,8 +23,14 @@ class AppRepository (
         }
     }
 
-    val userId = dataStore.data.map { preferences -> preferences[USER_ID_KEY]?.toInt() ?: -1 }
+    val userId = dataStore.data.map { preferences ->
+        try {
+            preferences[USER_ID_KEY]?.toInt()
+        } catch (_: NumberFormatException) {
+            null
+        }
+    }
 
     suspend fun setTheme(theme: Theme) = dataStore.edit { preferences -> preferences[THEME_KEY] = theme.toString() }
-    suspend fun setUserId(userId: Int) = dataStore.edit { preferences -> preferences[USER_ID_KEY] = userId.toString() }
+    suspend fun setUserId(userId: Int?) = dataStore.edit { preferences -> preferences[USER_ID_KEY] = userId.toString() }
 }
