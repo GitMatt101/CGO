@@ -66,7 +66,7 @@ fun MenuBar(navController: NavHostController) {
             val appState by appViewModel.state.collectAsStateWithLifecycle()
             IconButton(onClick = {
                 navController.popBackStack()
-                navController.navigate(OCGRoute.Profile.buildRoute(appState.userId))
+                navController.navigate(appState.userId?.let { OCGRoute.Profile.buildRoute(it) } ?: run { OCGRoute.Profile.buildRoute(-1) })
             }) {
                 MenuIcon(painterResource(id = R.drawable.profile), "Profile", 80)
             }

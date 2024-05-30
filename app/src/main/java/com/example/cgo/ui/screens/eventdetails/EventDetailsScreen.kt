@@ -11,8 +11,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.Button
@@ -93,7 +93,9 @@ fun EventDetailsScreen(
         Column(
             verticalArrangement = Arrangement.spacedBy(12.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(contentPadding)
+            modifier = Modifier
+                .padding(contentPadding)
+                .verticalScroll(rememberScrollState())
         ) {
             Text(
                 eventWithUsers.event.title,
@@ -122,7 +124,7 @@ fun EventDetailsScreen(
             )
             var participants by remember { mutableStateOf(eventWithUsers.participants) }
             var isParticipant by remember { mutableStateOf(eventWithUsers.participants.find { participant: User -> participant.userId == loggedUserId } != null) }
-            if (isParticipant) {
+            if (isParticipant && eventWithUsers.event.winnerId == null) {
                 Button(onClick = {
                     onSubscriptionCanceled(eventWithUsers.event.eventId)
                     isParticipant = false
@@ -130,7 +132,7 @@ fun EventDetailsScreen(
                 }) {
                     Text(text = "Cancel Participation")
                 }
-            } else if (eventWithUsers.event.maxParticipants > eventWithUsers.participants.size) {
+            } else if (eventWithUsers.event.maxParticipants > eventWithUsers.participants.size && eventWithUsers.event.winnerId == null) {
                 Button (
                     onClick = {
                         onSubscription(eventWithUsers.event.eventId)
@@ -158,6 +160,7 @@ fun EventDetailsScreen(
                     }
                 }
             )
+            HorizontalDivider()
             ParticipantsList (
                 event = eventWithUsers.event,
                 participants = participants,
@@ -185,11 +188,11 @@ fun ParticipantsList (
         Text(text = "Participants (${participants.size}/${event.maxParticipants})", fontWeight = FontWeight.Bold, modifier = Modifier.align(Alignment.CenterHorizontally))
         Spacer(Modifier.size(10.dp))
         if (participants.isNotEmpty()) {
-            var winnerId by remember { mutableStateOf(event.winnerId) }
-            LazyColumn (
-                modifier = Modifier.border(width = 2.dp, color = Color.DarkGray)
+            Column (
+                modifier = Modifier.border(2.dp, Color.Gray)
             ) {
-                items(participants) { user: User ->
+                var winnerId by remember { mutableStateOf(event.winnerId) }
+                participants.forEach { user: User ->
                     ListItem(
                         modifier = Modifier.clickable(onClick = {
                             navController.navigate(
