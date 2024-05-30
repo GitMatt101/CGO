@@ -47,14 +47,15 @@ fun AppBar(
             }
         },
         actions = {
+            val appViewModel = koinViewModel<AppViewModel>()
+            val appState by appViewModel.state.collectAsStateWithLifecycle()
             // While in the profile screen the user can access the app's settings
-            if (currentRoute.route == OCGRoute.Profile.route) {
+            if (currentRoute.route == OCGRoute.Profile.route && navController.currentBackStackEntry?.arguments?.getInt("userId") == appState.userId) {
                 IconButton(onClick = { navController.navigate(OCGRoute.Settings.route) }) {
                     Icon(Icons.Outlined.Settings, "Settings")
                 }
             }
             if (currentRoute.route == OCGRoute.Settings.route) {
-                val appViewModel = koinViewModel<AppViewModel>()
                 IconButton(onClick = {
                     appViewModel.changeUserId(null).invokeOnCompletion {
                         if (it == null) {
