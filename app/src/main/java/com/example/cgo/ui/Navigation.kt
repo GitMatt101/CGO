@@ -223,8 +223,10 @@ fun OCGNavGraph(
                 AddEventScreen(
                     state = state,
                     actions = addEventVm.actions,
-                    onSubmit = { eventsVm.addEvent(state.toEvent(appState.userId!!)) },
-                    navController = navController
+                    onSubmit = {
+                        eventsVm.addEvent(state.toEvent(appState.userId!!))
+                        navController.navigateUp()
+                    }
                 )
             }
         }

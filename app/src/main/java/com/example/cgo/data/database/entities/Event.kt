@@ -7,7 +7,6 @@ import androidx.room.PrimaryKey
 enum class PrivacyType {
     NONE,
     PUBLIC,
-    FRIENDS,
     PRIVATE
 }
 

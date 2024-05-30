@@ -62,7 +62,6 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import androidx.navigation.NavHostController
 import com.example.cgo.data.database.entities.PrivacyType
 import java.time.LocalDate
 import java.time.LocalTime
@@ -72,8 +71,7 @@ import java.time.format.DateTimeFormatter
 fun AddEventScreen(
     state: AddEventState,
     actions: AddEventActions,
-    onSubmit: () -> Unit,
-    navController: NavHostController
+    onSubmit: () -> Unit
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     var showSnackbar by remember { mutableStateOf(false) }
@@ -139,7 +137,6 @@ fun AddEventScreen(
                     return@FloatingActionButton
                 }
                 onSubmit()
-                navController.navigateUp()
             }) {
                 Icon(Icons.Outlined.Check, "Add Event")
             }
@@ -380,6 +377,8 @@ fun CustomDatePicker(
                     Text("Cancel")
                 }
                 TextButton(onClick = {
+                    if (dateState.selectedDateMillis == null)
+                        return@TextButton
                     actions.setDate(
                         LocalDate.ofEpochDay(dateState.selectedDateMillis!! / 86400000)
                             .format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))

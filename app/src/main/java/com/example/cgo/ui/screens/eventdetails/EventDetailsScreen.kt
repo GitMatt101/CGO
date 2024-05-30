@@ -146,7 +146,14 @@ fun EventDetailsScreen(
             ListItem(
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
-                    .padding(horizontal = 60.dp),
+                    .padding(horizontal = 50.dp)
+                    .clickable {
+                        navController.navigate(
+                            OCGRoute.Profile.buildRoute(
+                                eventCreator.userId
+                            )
+                        )
+                    },
                 headlineContent = { Text(text = "[OWNER]") },
                 trailingContent = {
                     Row {
