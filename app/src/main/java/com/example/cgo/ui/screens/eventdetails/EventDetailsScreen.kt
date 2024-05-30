@@ -124,7 +124,7 @@ fun EventDetailsScreen(
             )
             var participants by remember { mutableStateOf(eventWithUsers.participants) }
             var isParticipant by remember { mutableStateOf(eventWithUsers.participants.find { participant: User -> participant.userId == loggedUserId } != null) }
-            if (isParticipant) {
+            if (isParticipant && eventWithUsers.event.winnerId == null) {
                 Button(onClick = {
                     onSubscriptionCanceled(eventWithUsers.event.eventId)
                     isParticipant = false
@@ -132,7 +132,7 @@ fun EventDetailsScreen(
                 }) {
                     Text(text = "Cancel Participation")
                 }
-            } else if (eventWithUsers.event.maxParticipants > eventWithUsers.participants.size) {
+            } else if (eventWithUsers.event.maxParticipants > eventWithUsers.participants.size && eventWithUsers.event.winnerId == null) {
                 Button (
                     onClick = {
                         onSubscription(eventWithUsers.event.eventId)
