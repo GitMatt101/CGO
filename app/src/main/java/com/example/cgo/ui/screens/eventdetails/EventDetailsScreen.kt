@@ -2,6 +2,7 @@ package com.example.cgo.ui.screens.eventdetails
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -16,6 +17,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -33,6 +35,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -57,6 +60,7 @@ fun EventDetailsScreen(
     onSubscription: (Int) -> Unit,
     onSubscriptionCanceled: (Int) -> Unit,
     onWinnerSelection: (User, User?) -> Unit,
+    onDelete: () -> Unit,
     loadParticipants: () -> List<User>
 ) {
     val context = LocalContext.current
@@ -68,11 +72,11 @@ fun EventDetailsScreen(
             type = "text/plain"
             putExtra(
                 Intent.EXTRA_TEXT,
-                "Partecipa all'evento: "
+                "Join the event: "
                         + eventWithUsers.event.title
-                        + " inserendo il codice "
+                        + " using code "
                         + eventWithUsers.event.eventId
-                        + " su OCG!")
+                        + " on OCG!")
         }
         val shareIntent = Intent.createChooser(sendIntent, "Share event")
         if (shareIntent.resolveActivity(context.packageManager) != null) {
@@ -102,6 +106,15 @@ fun EventDetailsScreen(
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
                 style = MaterialTheme.typography.titleLarge
             )
+            if (eventCreator.userId == loggedUserId && eventWithUsers.event.winnerId == null) {
+                Button(
+                    onClick = onDelete,
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
+                    shape = RectangleShape
+                ) {
+                    Text(text = "Delete")
+                }
+            }
             Text(
                 eventWithUsers.event.description,
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
