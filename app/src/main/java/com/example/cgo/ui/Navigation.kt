@@ -119,8 +119,10 @@ fun OCGNavGraph(
                     navigateAndClearBackstack(route, OCGRoute.Login.route, navController)
                     return@composable
                 }
-                val createdEvents = eventsState.eventsWithUsers.filter { it.event.eventCreatorId == appState.userId }
-                val publicEvents = eventsState.eventsWithUsers.filter { it.event.privacyType == PrivacyType.PUBLIC }
+                val createdEvents =
+                    eventsState.eventsWithUsers.filter { it.event.eventCreatorId == appState.userId }
+                val publicEvents =
+                    eventsState.eventsWithUsers.filter { it.event.privacyType == PrivacyType.PUBLIC }
                 HomeScreen(
                     publicEvents = publicEvents,
                     createdEvents = createdEvents,
@@ -139,7 +141,7 @@ fun OCGNavGraph(
                     LoginScreen(
                         state = state,
                         actions = loginViewModel.actions,
-                        onLogin = { email: String, password: String ->
+                        onLogin = { email: String, password: String, errorMessage: () -> Unit ->
                             onQueryComplete(
                                 usersViewModel.getUserOnLogin(email = email, password = password),
                                 onComplete = { result: Any ->
@@ -155,7 +157,11 @@ fun OCGNavGraph(
                                         }
                                 },
                                 checkResult = { result: Any? ->
-                                    result != null && result is User
+                                    val check = result != null && result is User
+                                    if (!check) {
+                                        errorMessage()
+                                    }
+                                    return@onQueryComplete check
                                 }
                             )
                         },
@@ -195,7 +201,8 @@ fun OCGNavGraph(
                                 }
                             )
                         }
-                    }
+                    },
+                    navController = navController
                 )
             }
         }
@@ -393,38 +400,44 @@ fun OCGNavGraph(
                                 )
                             }
                         },
-                        onWinnerSelection = {winner: User, previousWinner: User? ->
+                        onWinnerSelection = { winner: User, previousWinner: User? ->
                             previousWinner?.let {
-                                usersViewModel.updateUser(User(
-                                    userId = previousWinner.userId,
-                                    username = previousWinner.username,
-                                    email = previousWinner.email,
-                                    password = previousWinner.password,
-                                    profilePicture = previousWinner.profilePicture,
-                                    gamesWon = previousWinner.gamesWon - 1
-                                ))
+                                usersViewModel.updateUser(
+                                    User(
+                                        userId = previousWinner.userId,
+                                        username = previousWinner.username,
+                                        email = previousWinner.email,
+                                        password = previousWinner.password,
+                                        profilePicture = previousWinner.profilePicture,
+                                        gamesWon = previousWinner.gamesWon - 1
+                                    )
+                                )
                             }
-                            usersViewModel.updateUser(User(
-                                userId = winner.userId,
-                                username = winner.username,
-                                email = winner.email,
-                                password = winner.password,
-                                profilePicture = winner.profilePicture,
-                                gamesWon = winner.gamesWon + 1
-                            ))
-                            eventsVm.updateEvent(Event(
-                                eventId = eventWithUsers.event.eventId,
-                                title = eventWithUsers.event.title,
-                                description = eventWithUsers.event.description,
-                                date = eventWithUsers.event.date,
-                                time = eventWithUsers.event.time,
-                                address = eventWithUsers.event.address,
-                                city = eventWithUsers.event.city,
-                                maxParticipants = eventWithUsers.event.maxParticipants,
-                                privacyType = eventWithUsers.event.privacyType,
-                                eventCreatorId = eventWithUsers.event.eventCreatorId,
-                                winnerId = winner.userId
-                            ))
+                            usersViewModel.updateUser(
+                                User(
+                                    userId = winner.userId,
+                                    username = winner.username,
+                                    email = winner.email,
+                                    password = winner.password,
+                                    profilePicture = winner.profilePicture,
+                                    gamesWon = winner.gamesWon + 1
+                                )
+                            )
+                            eventsVm.updateEvent(
+                                Event(
+                                    eventId = eventWithUsers.event.eventId,
+                                    title = eventWithUsers.event.title,
+                                    description = eventWithUsers.event.description,
+                                    date = eventWithUsers.event.date,
+                                    time = eventWithUsers.event.time,
+                                    address = eventWithUsers.event.address,
+                                    city = eventWithUsers.event.city,
+                                    maxParticipants = eventWithUsers.event.maxParticipants,
+                                    privacyType = eventWithUsers.event.privacyType,
+                                    eventCreatorId = eventWithUsers.event.eventCreatorId,
+                                    winnerId = winner.userId
+                                )
+                            )
                         },
                         loadParticipants = {
                             isEventCoroutineFinished = false
@@ -532,7 +545,11 @@ fun OCGNavGraph(
     }
 }
 
-fun navigateAndClearBackstack(currentRoute: String, destination: String, navController: NavHostController) {
+fun navigateAndClearBackstack(
+    currentRoute: String,
+    destination: String,
+    navController: NavHostController
+) {
     navController.popBackStack(
         route = currentRoute,
         inclusive = true

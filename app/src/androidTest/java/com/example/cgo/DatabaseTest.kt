@@ -4,8 +4,6 @@ import androidx.room.Room
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.example.cgo.data.database.CGODatabase
-import com.example.cgo.data.database.entities.Event
-import com.example.cgo.data.database.entities.PrivacyType
 import com.example.cgo.data.database.entities.User
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
