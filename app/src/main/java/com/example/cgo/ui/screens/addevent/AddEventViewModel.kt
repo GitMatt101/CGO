@@ -6,7 +6,6 @@ import com.example.cgo.data.database.entities.PrivacyType
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import okhttp3.Address
 
 data class AddEventState(
     val title: String = "",

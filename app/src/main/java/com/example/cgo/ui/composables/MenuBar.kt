@@ -47,7 +47,6 @@ fun MenuBar(navController: NavHostController) {
 
             Spacer(modifier = Modifier.weight(1.0f, true))
             IconButton(onClick = {
-                navController.popBackStack()
                 navController.navigate(OCGRoute.AddEvent.route)
             }) {
                 MenuIcon(painterResource(id = R.drawable.add), "Add Event", 80)

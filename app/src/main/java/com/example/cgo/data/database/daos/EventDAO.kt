@@ -7,7 +7,6 @@ import androidx.room.Transaction
 import androidx.room.Upsert
 import com.example.cgo.data.database.entities.Event
 import com.example.cgo.data.database.entities.EventWithUsers
-import com.example.cgo.data.database.entities.UserWithEvents
 import kotlinx.coroutines.flow.Flow
 
 @Dao

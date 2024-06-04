@@ -12,8 +12,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -47,14 +45,15 @@ fun AppBar(
             }
         },
         actions = {
+            val appViewModel = koinViewModel<AppViewModel>()
+            val appState by appViewModel.state.collectAsStateWithLifecycle()
             // While in the profile screen the user can access the app's settings
-            if (currentRoute.route == OCGRoute.Profile.route) {
+            if (currentRoute.route == OCGRoute.Profile.route && navController.currentBackStackEntry?.arguments?.getInt("userId") == appState.userId) {
                 IconButton(onClick = { navController.navigate(OCGRoute.Settings.route) }) {
                     Icon(Icons.Outlined.Settings, "Settings")
                 }
             }
             if (currentRoute.route == OCGRoute.Settings.route) {
-                val appViewModel = koinViewModel<AppViewModel>()
                 IconButton(onClick = {
                     appViewModel.changeUserId(null).invokeOnCompletion {
                         if (it == null) {
