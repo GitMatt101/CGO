@@ -153,6 +153,7 @@ fun AddEventScreen(
                     start = contentPadding.calculateStartPadding(LayoutDirection.Ltr),
                     end = contentPadding.calculateEndPadding(LayoutDirection.Rtl)
                 )
+                .padding(horizontal = 16.dp)
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
         ) {
