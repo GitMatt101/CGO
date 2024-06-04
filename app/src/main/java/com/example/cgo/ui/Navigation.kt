@@ -147,13 +147,8 @@ fun OCGNavGraph(
                                 onComplete = { result: Any ->
                                     appViewModel.changeUserId((result as User).userId)
                                         .invokeOnCompletion {
-                                            if (it == null) {
-                                                navController.popBackStack(
-                                                    OCGRoute.Login.route,
-                                                    inclusive = true
-                                                )
-                                                navController.navigate(OCGRoute.Home.route)
-                                            }
+                                            if (it == null)
+                                                navigateAndClearBackstack(route, OCGRoute.Home.route, navController)
                                         }
                                 },
                                 checkResult = { result: Any? ->
@@ -187,13 +182,8 @@ fun OCGNavGraph(
                                 onComplete = { result: Any ->
                                     appViewModel.changeUserId((result as User).userId)
                                         .invokeOnCompletion {
-                                            if (it == null) {
-                                                navController.popBackStack(
-                                                    OCGRoute.Login.route,
-                                                    inclusive = true
-                                                )
-                                                navController.navigate(OCGRoute.Home.route)
-                                            }
+                                            if (it == null)
+                                                navigateAndClearBackstack(route, OCGRoute.Home.route, navController)
                                         }
                                 },
                                 checkResult = { result: Any? ->
@@ -438,6 +428,10 @@ fun OCGNavGraph(
                                     winnerId = winner.userId
                                 )
                             )
+                        },
+                        onDelete = {
+                            eventsVm.deleteEvent(eventWithUsers.event)
+                            navController.navigateUp()
                         },
                         loadParticipants = {
                             isEventCoroutineFinished = false
