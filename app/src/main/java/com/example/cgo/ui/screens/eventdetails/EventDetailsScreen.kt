@@ -58,10 +58,10 @@ fun EventDetailsScreen(
     navController: NavHostController,
     onSubscription: (Int) -> Unit,
     onSubscriptionCanceled: (Int) -> Unit,
-    onWinnerSelection: (User, User?) -> Unit,
-    onDelete: (User?) -> Unit,
+    onWinnerSelection: (Int) -> Unit,
+    onDelete: () -> Unit,
     loadParticipants: () -> List<User>,
-    onWinnerDeselected: (User) -> Unit
+    onWinnerDeselected: () -> Unit
 ) {
     val context = LocalContext.current
 
@@ -177,7 +177,7 @@ fun EventDetailsScreen(
             )
             if (eventCreator.userId == loggedUserId) {
                 Button(
-                    onClick = { onDelete(participants.find { it.userId == eventWithUsers.event.winnerId }) },
+                    onClick = onDelete,
                     colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
                     shape = CircleShape
                 ) {
@@ -205,9 +205,9 @@ fun ParticipantsList(
     participants: List<User>,
     loggedUserId: Int,
     navController: NavHostController,
-    onWinnerSelection: (User, User?) -> Unit,
+    onWinnerSelection: (Int) -> Unit,
     loadParticipants: () -> List<User>,
-    onWinnerDeselected: (User) -> Unit
+    onWinnerDeselected: () -> Unit
 ) {
     var currentParticipants by remember { mutableStateOf(participants) }
     Column(
@@ -250,13 +250,11 @@ fun ParticipantsList(
                             }
                         },
                         trailingContent = {
-                            val previousWinner =
-                                currentParticipants.find { user.userId == winnerId }
                             if (user.userId != winnerId && loggedUserId == event.eventCreatorId) {
                                 Button(
                                     modifier = Modifier.align(alignment = Alignment.End),
                                     onClick = {
-                                        onWinnerSelection(user, previousWinner)
+                                        onWinnerSelection(user.userId)
                                         winnerId = user.userId
                                     }
                                 ) {
@@ -268,7 +266,7 @@ fun ParticipantsList(
                                     contentDescription = "Winner",
                                     modifier = Modifier
                                         .clickable {
-                                            onWinnerDeselected(previousWinner!!)
+                                            onWinnerDeselected()
                                             currentParticipants = loadParticipants()
                                         }
                                 )

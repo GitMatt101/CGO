@@ -53,6 +53,7 @@ import com.example.cgo.R
 import com.example.cgo.ui.CGORoute
 import com.example.cgo.ui.composables.ImageWithPlaceholder
 import com.example.cgo.ui.composables.Size
+import com.example.cgo.ui.controllers.UsersState
 import com.example.cgo.utils.rememberCameraLauncher
 import com.example.cgo.utils.rememberGalleryLauncher
 import com.example.cgo.utils.rememberPermission
@@ -61,6 +62,7 @@ val PADDING = 10.dp
 
 @Composable
 fun RegistrationScreen(
+    usersState: UsersState,
     state: RegistrationState,
     actions: RegistrationActions,
     onSubmit: () -> Unit,
@@ -206,6 +208,11 @@ fun RegistrationScreen(
 
                             state.email.contains("@").not() -> {
                                 snackbarMessage = "Invalid email"
+                                showSnackbar = true
+                            }
+
+                            usersState.users.any { it.email == state.email } -> {
+                                snackbarMessage = "Email already in use"
                                 showSnackbar = true
                             }
 

@@ -170,6 +170,7 @@ fun OCGNavGraph(
                 val registrationViewModel = koinViewModel<RegistrationViewModel>()
                 val state by registrationViewModel.state.collectAsStateWithLifecycle()
                 RegistrationScreen(
+                    usersState = usersState,
                     state = state,
                     actions = registrationViewModel.actions,
                     onSubmit = {
@@ -390,29 +391,7 @@ fun OCGNavGraph(
                                 )
                             }
                         },
-                        onWinnerSelection = { winner: User, previousWinner: User? ->
-                            previousWinner?.let {
-                                usersViewModel.updateUser(
-                                    User(
-                                        userId = previousWinner.userId,
-                                        username = previousWinner.username,
-                                        email = previousWinner.email,
-                                        password = previousWinner.password,
-                                        profilePicture = previousWinner.profilePicture,
-                                        gamesWon = previousWinner.gamesWon - 1
-                                    )
-                                )
-                            }
-                            usersViewModel.updateUser(
-                                User(
-                                    userId = winner.userId,
-                                    username = winner.username,
-                                    email = winner.email,
-                                    password = winner.password,
-                                    profilePicture = winner.profilePicture,
-                                    gamesWon = winner.gamesWon + 1
-                                )
-                            )
+                        onWinnerSelection = { winnerId: Int ->
                             eventsVm.updateEvent(
                                 Event(
                                     eventId = eventWithUsers.event.eventId,
@@ -425,25 +404,13 @@ fun OCGNavGraph(
                                     maxParticipants = eventWithUsers.event.maxParticipants,
                                     privacyType = eventWithUsers.event.privacyType,
                                     eventCreatorId = eventWithUsers.event.eventCreatorId,
-                                    winnerId = winner.userId
+                                    winnerId = winnerId
                                 )
                             )
                         },
                         onDelete = {
                             eventsVm.deleteEvent(eventWithUsers.event)
                             navController.navigateUp()
-                            it?.let {
-                                usersViewModel.updateUser(
-                                    User(
-                                        userId = it.userId,
-                                        username = it.username,
-                                        email = it.email,
-                                        password = it.password,
-                                        profilePicture = it.profilePicture,
-                                        gamesWon = it.gamesWon - 1
-                                    )
-                                )
-                            }
                         },
                         loadParticipants = {
                             isEventCoroutineFinished = false
@@ -477,16 +444,6 @@ fun OCGNavGraph(
                                     privacyType = eventWithUsers.event.privacyType,
                                     eventCreatorId = eventWithUsers.event.eventCreatorId,
                                     winnerId = null
-                                )
-                            )
-                            usersViewModel.updateUser(
-                                User(
-                                    userId = it.userId,
-                                    username = it.username,
-                                    email = it.email,
-                                    password = it.password,
-                                    profilePicture = it.profilePicture,
-                                    gamesWon = it.gamesWon - 1
                                 )
                             )
                         }
