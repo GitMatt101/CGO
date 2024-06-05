@@ -27,6 +27,11 @@ fun AppBar(
     navController: NavHostController,
     currentRoute: OCGRoute
 ) {
+    val routesBlackList = listOf(OCGRoute.Home, OCGRoute.Search, OCGRoute.AddEvent, OCGRoute.Rankings)
+    fun checkRoute() : Boolean = routesBlackList.map { it.route }.contains(currentRoute.route)
+
+    val appViewModel = koinViewModel<AppViewModel>()
+    val appState by appViewModel.state.collectAsStateWithLifecycle()
     CenterAlignedTopAppBar(
         title = {
             Text(
@@ -35,7 +40,9 @@ fun AppBar(
             )
         },
         navigationIcon = {
-            if (navController.previousBackStackEntry != null) {
+            if (navController.previousBackStackEntry != null && !checkRoute()) {
+                if (currentRoute == OCGRoute.Profile && navController.currentBackStackEntry?.arguments?.getInt("userId") == appState.userId)
+                    return@CenterAlignedTopAppBar
                 IconButton(onClick = { navController.navigateUp() }) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Outlined.ArrowBack,

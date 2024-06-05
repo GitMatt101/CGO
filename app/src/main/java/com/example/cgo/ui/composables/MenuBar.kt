@@ -23,6 +23,11 @@ import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun MenuBar(navController: NavHostController) {
+    val routesBlackList = listOf(OCGRoute.Home, OCGRoute.Search, OCGRoute.AddEvent, OCGRoute.Rankings)
+    fun deleteDuplicates(route: String) {
+        navController.popBackStack(route, true)
+        OCGRoute.routes.filter { !routesBlackList.contains(it) }.forEach { navController.popBackStack(it.route, true) }
+    }
     BottomAppBar(
         containerColor = MaterialTheme.colorScheme.primaryContainer,
         contentColor = MaterialTheme.colorScheme.onPrimaryContainer
@@ -31,7 +36,7 @@ fun MenuBar(navController: NavHostController) {
             Spacer(modifier = Modifier.weight(1.0f, true))
 
             IconButton(onClick = {
-                navController.popBackStack()
+                deleteDuplicates(OCGRoute.Home.route)
                 navController.navigate(OCGRoute.Home.route)
             }) {
                 MenuIcon(painterResource(id = R.drawable.home), "Home", 80)
@@ -39,7 +44,7 @@ fun MenuBar(navController: NavHostController) {
 
             Spacer(modifier = Modifier.weight(1.0f, true))
             IconButton(onClick = {
-                navController.popBackStack()
+                deleteDuplicates(OCGRoute.Search.route)
                 navController.navigate(OCGRoute.Search.route)
             }) {
                 MenuIcon(painterResource(id = R.drawable.search), "Search", 80)
@@ -47,6 +52,7 @@ fun MenuBar(navController: NavHostController) {
 
             Spacer(modifier = Modifier.weight(1.0f, true))
             IconButton(onClick = {
+                deleteDuplicates(OCGRoute.AddEvent.route)
                 navController.navigate(OCGRoute.AddEvent.route)
             }) {
                 MenuIcon(painterResource(id = R.drawable.add), "Add Event", 80)
@@ -54,7 +60,7 @@ fun MenuBar(navController: NavHostController) {
 
             Spacer(modifier = Modifier.weight(1.0f, true))
             IconButton(onClick = {
-                navController.popBackStack()
+                deleteDuplicates(OCGRoute.Rankings.route)
                 navController.navigate(OCGRoute.Rankings.route)
             }) {
                 MenuIcon(painterResource(id = R.drawable.trophy), "Rankings", 70)
@@ -64,7 +70,7 @@ fun MenuBar(navController: NavHostController) {
             val appViewModel = koinViewModel<AppViewModel>()
             val appState by appViewModel.state.collectAsStateWithLifecycle()
             IconButton(onClick = {
-                navController.popBackStack()
+                deleteDuplicates(OCGRoute.Profile.route)
                 navController.navigate(appState.userId?.let { OCGRoute.Profile.buildRoute(it) } ?: run { OCGRoute.Profile.buildRoute(-1) })
             }) {
                 MenuIcon(painterResource(id = R.drawable.profile), "Profile", 80)
