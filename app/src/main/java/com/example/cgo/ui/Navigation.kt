@@ -44,21 +44,21 @@ import com.example.cgo.ui.screens.settings.changeprofile.EditProfileScreen
 import com.example.cgo.ui.screens.settings.changeprofile.EditProfileViewModel
 import kotlinx.coroutines.Deferred
 
-sealed class OCGRoute(
+sealed class CGORoute(
     val route: String,
     val title: String,
     val arguments: List<NamedNavArgument> = emptyList()
 ) {
     // Login routes
-    data object Login : OCGRoute("login", "Login")
-    data object Registration : OCGRoute("registration", "Registration")
+    data object Login : CGORoute("login", "Login")
+    data object Registration : CGORoute("registration", "Registration")
 
     // Menu routes
-    data object Home : OCGRoute("events", "Events")
-    data object Search : OCGRoute("search", "Search")
-    data object AddEvent : OCGRoute("add", "Create Event")
-    data object Rankings : OCGRoute("rankings", "Rankings")
-    data object Profile : OCGRoute(
+    data object Home : CGORoute("events", "Events")
+    data object Search : CGORoute("search", "Search")
+    data object AddEvent : CGORoute("add", "Create Event")
+    data object Rankings : CGORoute("rankings", "Rankings")
+    data object Profile : CGORoute(
         "profile/{userId}",
         "Profile",
         listOf(navArgument("userId") { type = NavType.IntType })
@@ -67,10 +67,10 @@ sealed class OCGRoute(
     }
 
     // Other routes
-    data object Settings : OCGRoute("settings", "Settings")
-    data object EditProfile : OCGRoute("edit-profile", "Edit Profile")
-    data object EventsMap : OCGRoute("map", "Events Map")
-    data object EventDetails : OCGRoute(
+    data object Settings : CGORoute("settings", "Settings")
+    data object EditProfile : CGORoute("edit-profile", "Edit Profile")
+    data object EventsMap : CGORoute("map", "Events Map")
+    data object EventDetails : CGORoute(
         "events/{eventID}",
         "Event Details",
         listOf(navArgument("eventID") { type = NavType.IntType })
@@ -110,13 +110,13 @@ fun OCGNavGraph(
 
     NavHost(
         navController = navController,
-        startDestination = OCGRoute.Login.route,
+        startDestination = CGORoute.Login.route,
         modifier = modifier
     ) {
-        with(OCGRoute.Home) {
+        with(CGORoute.Home) {
             composable(route) {
                 if (appState.userId == null) {
-                    navigateAndClearBackstack(route, OCGRoute.Login.route, navController)
+                    navigateAndClearBackstack(route, CGORoute.Login.route, navController)
                     return@composable
                 }
                 val createdEvents =
@@ -130,13 +130,13 @@ fun OCGNavGraph(
                 )
             }
         }
-        with(OCGRoute.Login) {
+        with(CGORoute.Login) {
             composable(route) {
                 val loginViewModel = koinViewModel<LoginViewModel>()
                 val state by loginViewModel.state.collectAsStateWithLifecycle()
                 if (appState.userId != null) {
                     navController.popBackStack()
-                    navController.navigate(OCGRoute.Home.route)
+                    navController.navigate(CGORoute.Home.route)
                 } else {
                     LoginScreen(
                         state = state,
@@ -148,7 +148,7 @@ fun OCGNavGraph(
                                     appViewModel.changeUserId((result as User).userId)
                                         .invokeOnCompletion {
                                             if (it == null)
-                                                navigateAndClearBackstack(route, OCGRoute.Home.route, navController)
+                                                navigateAndClearBackstack(route, CGORoute.Home.route, navController)
                                         }
                                 },
                                 checkResult = { result: Any? ->
@@ -165,7 +165,7 @@ fun OCGNavGraph(
                 }
             }
         }
-        with(OCGRoute.Registration) {
+        with(CGORoute.Registration) {
             composable(route) {
                 val registrationViewModel = koinViewModel<RegistrationViewModel>()
                 val state by registrationViewModel.state.collectAsStateWithLifecycle()
@@ -183,7 +183,7 @@ fun OCGNavGraph(
                                     appViewModel.changeUserId((result as User).userId)
                                         .invokeOnCompletion {
                                             if (it == null)
-                                                navigateAndClearBackstack(route, OCGRoute.Home.route, navController)
+                                                navigateAndClearBackstack(route, CGORoute.Home.route, navController)
                                         }
                                 },
                                 checkResult = { result: Any? ->
@@ -196,10 +196,10 @@ fun OCGNavGraph(
                 )
             }
         }
-        with(OCGRoute.Search) {
+        with(CGORoute.Search) {
             composable(route) {
                 if (appState.userId == null) {
-                    navigateAndClearBackstack(route, OCGRoute.Login.route, navController)
+                    navigateAndClearBackstack(route, CGORoute.Login.route, navController)
                     return@composable
                 }
                 SearchScreen(
@@ -209,10 +209,10 @@ fun OCGNavGraph(
                 )
             }
         }
-        with(OCGRoute.AddEvent) {
+        with(CGORoute.AddEvent) {
             composable(route) {
                 if (appState.userId == null) {
-                    navigateAndClearBackstack(route, OCGRoute.Login.route, navController)
+                    navigateAndClearBackstack(route, CGORoute.Login.route, navController)
                     return@composable
                 }
                 val addEventVm = koinViewModel<AddEventViewModel>()
@@ -227,10 +227,10 @@ fun OCGNavGraph(
                 )
             }
         }
-        with(OCGRoute.Rankings) {
+        with(CGORoute.Rankings) {
             composable(route) {
                 if (appState.userId == null) {
-                    navigateAndClearBackstack(route, OCGRoute.Login.route, navController)
+                    navigateAndClearBackstack(route, CGORoute.Login.route, navController)
                     return@composable
                 }
                 RankingsScreen(
@@ -239,10 +239,10 @@ fun OCGNavGraph(
                 )
             }
         }
-        with(OCGRoute.Profile) {
+        with(CGORoute.Profile) {
             composable(route, arguments) { backStackEntry: NavBackStackEntry ->
                 if (appState.userId == null) {
-                    navigateAndClearBackstack(route, OCGRoute.Login.route, navController)
+                    navigateAndClearBackstack(route, CGORoute.Login.route, navController)
                     return@composable
                 }
                 // Create temporary user (also useful in case of error while fetching data from Database)
@@ -289,10 +289,10 @@ fun OCGNavGraph(
                 }
             }
         }
-        with(OCGRoute.EventDetails) {
+        with(CGORoute.EventDetails) {
             composable(route, arguments) { backStackEntry ->
                 if (appState.userId == null) {
-                    navigateAndClearBackstack(route, OCGRoute.Login.route, navController)
+                    navigateAndClearBackstack(route, CGORoute.Login.route, navController)
                     return@composable
                 }
                 var eventWithUsers by remember {
@@ -494,10 +494,10 @@ fun OCGNavGraph(
                 }
             }
         }
-        with(OCGRoute.Settings) {
+        with(CGORoute.Settings) {
             composable(route) {
                 if (appState.userId == null) {
-                    navigateAndClearBackstack(route, OCGRoute.Login.route, navController)
+                    navigateAndClearBackstack(route, CGORoute.Login.route, navController)
                     return@composable
                 }
                 SettingsScreen(
@@ -507,10 +507,10 @@ fun OCGNavGraph(
                 )
             }
         }
-        with(OCGRoute.EditProfile) {
+        with(CGORoute.EditProfile) {
             composable(route) {
                 if (appState.userId == null) {
-                    navigateAndClearBackstack(route, OCGRoute.Login.route, navController)
+                    navigateAndClearBackstack(route, CGORoute.Login.route, navController)
                     return@composable
                 }
                 // Create temporary user (also useful in case of error while fetching data from Database)
@@ -563,10 +563,10 @@ fun OCGNavGraph(
                 }
             }
         }
-        with(OCGRoute.EventsMap) {
+        with(CGORoute.EventsMap) {
             composable(route) {
                 if (appState.userId == null) {
-                    navigateAndClearBackstack(route, OCGRoute.Login.route, navController)
+                    navigateAndClearBackstack(route, CGORoute.Login.route, navController)
                     return@composable
                 }
                 EventMapScreen(

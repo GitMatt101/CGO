@@ -46,7 +46,7 @@ import com.example.cgo.R
 import com.example.cgo.data.database.entities.Event
 import com.example.cgo.data.database.entities.EventWithUsers
 import com.example.cgo.data.database.entities.User
-import com.example.cgo.ui.OCGRoute
+import com.example.cgo.ui.CGORoute
 import com.example.cgo.ui.composables.ImageWithPlaceholder
 import com.example.cgo.ui.composables.Size
 
@@ -154,7 +154,7 @@ fun EventDetailsScreen(
                     .padding(horizontal = 50.dp)
                     .clickable {
                         navController.navigate(
-                            OCGRoute.Profile.buildRoute(
+                            CGORoute.Profile.buildRoute(
                                 eventCreator.userId
                             )
                         )
@@ -230,7 +230,7 @@ fun ParticipantsList(
                     ListItem(
                         modifier = Modifier.clickable(onClick = {
                             navController.navigate(
-                                OCGRoute.Profile.buildRoute(
+                                CGORoute.Profile.buildRoute(
                                     user.userId
                                 )
                             )

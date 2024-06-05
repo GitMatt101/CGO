@@ -43,7 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.cgo.R
-import com.example.cgo.ui.OCGRoute
+import com.example.cgo.ui.CGORoute
 import com.example.cgo.ui.screens.registration.PADDING
 
 @Composable
@@ -102,7 +102,7 @@ fun LoginScreen(
             )
             TextButton(onClick = {
                 navController.popBackStack()
-                navController.navigate(OCGRoute.Registration.route)
+                navController.navigate(CGORoute.Registration.route)
             }) {
                 Text("Don't have an account? Register")
             }

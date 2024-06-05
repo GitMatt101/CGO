@@ -17,16 +17,16 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.example.cgo.R
-import com.example.cgo.ui.OCGRoute
+import com.example.cgo.ui.CGORoute
 import com.example.cgo.ui.controllers.AppViewModel
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun MenuBar(navController: NavHostController) {
-    val routesBlackList = listOf(OCGRoute.Home, OCGRoute.Search, OCGRoute.AddEvent, OCGRoute.Rankings)
+    val routesBlackList = listOf(CGORoute.Home, CGORoute.Search, CGORoute.AddEvent, CGORoute.Rankings)
     fun deleteDuplicates(route: String) {
         navController.popBackStack(route, true)
-        OCGRoute.routes.filter { !routesBlackList.contains(it) }.forEach { navController.popBackStack(it.route, true) }
+        CGORoute.routes.filter { !routesBlackList.contains(it) }.forEach { navController.popBackStack(it.route, true) }
     }
     BottomAppBar(
         containerColor = MaterialTheme.colorScheme.primaryContainer,
@@ -36,32 +36,32 @@ fun MenuBar(navController: NavHostController) {
             Spacer(modifier = Modifier.weight(1.0f, true))
 
             IconButton(onClick = {
-                deleteDuplicates(OCGRoute.Home.route)
-                navController.navigate(OCGRoute.Home.route)
+                deleteDuplicates(CGORoute.Home.route)
+                navController.navigate(CGORoute.Home.route)
             }) {
                 MenuIcon(painterResource(id = R.drawable.home), "Home", 80)
             }
 
             Spacer(modifier = Modifier.weight(1.0f, true))
             IconButton(onClick = {
-                deleteDuplicates(OCGRoute.Search.route)
-                navController.navigate(OCGRoute.Search.route)
+                deleteDuplicates(CGORoute.Search.route)
+                navController.navigate(CGORoute.Search.route)
             }) {
                 MenuIcon(painterResource(id = R.drawable.search), "Search", 80)
             }
 
             Spacer(modifier = Modifier.weight(1.0f, true))
             IconButton(onClick = {
-                deleteDuplicates(OCGRoute.AddEvent.route)
-                navController.navigate(OCGRoute.AddEvent.route)
+                deleteDuplicates(CGORoute.AddEvent.route)
+                navController.navigate(CGORoute.AddEvent.route)
             }) {
                 MenuIcon(painterResource(id = R.drawable.add), "Add Event", 80)
             }
 
             Spacer(modifier = Modifier.weight(1.0f, true))
             IconButton(onClick = {
-                deleteDuplicates(OCGRoute.Rankings.route)
-                navController.navigate(OCGRoute.Rankings.route)
+                deleteDuplicates(CGORoute.Rankings.route)
+                navController.navigate(CGORoute.Rankings.route)
             }) {
                 MenuIcon(painterResource(id = R.drawable.trophy), "Rankings", 70)
             }
@@ -70,8 +70,8 @@ fun MenuBar(navController: NavHostController) {
             val appViewModel = koinViewModel<AppViewModel>()
             val appState by appViewModel.state.collectAsStateWithLifecycle()
             IconButton(onClick = {
-                deleteDuplicates(OCGRoute.Profile.route)
-                navController.navigate(appState.userId?.let { OCGRoute.Profile.buildRoute(it) } ?: run { OCGRoute.Profile.buildRoute(-1) })
+                deleteDuplicates(CGORoute.Profile.route)
+                navController.navigate(appState.userId?.let { CGORoute.Profile.buildRoute(it) } ?: run { CGORoute.Profile.buildRoute(-1) })
             }) {
                 MenuIcon(painterResource(id = R.drawable.profile), "Profile", 80)
             }

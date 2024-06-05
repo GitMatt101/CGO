@@ -26,7 +26,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavHostController
 import com.example.cgo.data.remote.OSMDataSource
-import com.example.cgo.ui.OCGRoute
+import com.example.cgo.ui.CGORoute
 import com.example.cgo.ui.controllers.EventsState
 import com.example.cgo.utils.LocationService
 import org.koin.compose.koinInject
@@ -108,7 +108,7 @@ fun EventMapScreen(
                     setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
                     title = event.title
                     setOnMarkerClickListener { _, _ ->
-                        navController.navigate(OCGRoute.EventDetails.buildRoute(event.eventId))
+                        navController.navigate(CGORoute.EventDetails.buildRoute(event.eventId))
                         true
                     }
                 }

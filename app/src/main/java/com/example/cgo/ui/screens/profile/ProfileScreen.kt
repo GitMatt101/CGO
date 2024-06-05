@@ -21,7 +21,7 @@ import androidx.core.net.toUri
 import androidx.navigation.NavHostController
 import com.example.cgo.data.database.entities.Event
 import com.example.cgo.data.database.entities.User
-import com.example.cgo.ui.OCGRoute
+import com.example.cgo.ui.CGORoute
 import com.example.cgo.ui.composables.ImageWithPlaceholder
 import com.example.cgo.ui.composables.NoItemPlaceholder
 import androidx.compose.foundation.Canvas
@@ -119,7 +119,7 @@ fun MatchHistory(
                     EventItem(
                         event = event,
                         user = user,
-                        onClick = { navController.navigate(OCGRoute.EventDetails.buildRoute(event.eventId)) }
+                        onClick = { navController.navigate(CGORoute.EventDetails.buildRoute(event.eventId)) }
                     )
                 }
             }

@@ -17,7 +17,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.example.cgo.R
-import com.example.cgo.ui.OCGRoute
+import com.example.cgo.ui.CGORoute
 import com.example.cgo.ui.controllers.AppViewModel
 import org.koin.androidx.compose.koinViewModel
 
@@ -25,9 +25,9 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun AppBar(
     navController: NavHostController,
-    currentRoute: OCGRoute
+    currentRoute: CGORoute
 ) {
-    val routesBlackList = listOf(OCGRoute.Home, OCGRoute.Search, OCGRoute.AddEvent, OCGRoute.Rankings)
+    val routesBlackList = listOf(CGORoute.Home, CGORoute.Search, CGORoute.AddEvent, CGORoute.Rankings)
     fun checkRoute() : Boolean = routesBlackList.map { it.route }.contains(currentRoute.route)
 
     val appViewModel = koinViewModel<AppViewModel>()
@@ -41,7 +41,7 @@ fun AppBar(
         },
         navigationIcon = {
             if (navController.previousBackStackEntry != null && !checkRoute()) {
-                if (currentRoute == OCGRoute.Profile && navController.currentBackStackEntry?.arguments?.getInt("userId") == appState.userId)
+                if (currentRoute == CGORoute.Profile && navController.currentBackStackEntry?.arguments?.getInt("userId") == appState.userId)
                     return@CenterAlignedTopAppBar
                 IconButton(onClick = { navController.navigateUp() }) {
                     Icon(
@@ -52,20 +52,18 @@ fun AppBar(
             }
         },
         actions = {
-            val appViewModel = koinViewModel<AppViewModel>()
-            val appState by appViewModel.state.collectAsStateWithLifecycle()
             // While in the profile screen the user can access the app's settings
-            if (currentRoute.route == OCGRoute.Profile.route && navController.currentBackStackEntry?.arguments?.getInt("userId") == appState.userId) {
-                IconButton(onClick = { navController.navigate(OCGRoute.Settings.route) }) {
+            if (currentRoute.route == CGORoute.Profile.route && navController.currentBackStackEntry?.arguments?.getInt("userId") == appState.userId) {
+                IconButton(onClick = { navController.navigate(CGORoute.Settings.route) }) {
                     Icon(Icons.Outlined.Settings, "Settings")
                 }
             }
-            if (currentRoute.route == OCGRoute.Settings.route) {
+            if (currentRoute.route == CGORoute.Settings.route) {
                 IconButton(onClick = {
                     appViewModel.changeUserId(null).invokeOnCompletion {
                         if (it == null) {
-                            OCGRoute.routes.forEach { route: OCGRoute -> navController.popBackStack(route.route, true) }
-                            navController.navigate(OCGRoute.Login.route)
+                            CGORoute.routes.forEach { route: CGORoute -> navController.popBackStack(route.route, true) }
+                            navController.navigate(CGORoute.Login.route)
                         }
                     }
                 }) {

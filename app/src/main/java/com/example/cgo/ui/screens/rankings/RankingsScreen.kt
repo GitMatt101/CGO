@@ -35,7 +35,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.cgo.data.database.entities.User
 import com.example.cgo.data.database.entities.UserWithEvents
-import com.example.cgo.ui.OCGRoute
+import com.example.cgo.ui.CGORoute
 import com.example.cgo.ui.theme.Bronze
 import com.example.cgo.ui.theme.Gold
 import com.example.cgo.ui.theme.Silver
@@ -127,7 +127,7 @@ fun TabContentScreen(navController: NavHostController, users: List<Pair<User, In
                 val user: User = userWithNumber.first
                 ListItem(
                     modifier = Modifier.clickable(onClick = {
-                        navController.navigate(OCGRoute.Profile.buildRoute(user.userId))
+                        navController.navigate(CGORoute.Profile.buildRoute(user.userId))
                     }),
                     headlineContent = {
                         fun Modifier.circleLayout() = layout { measurable, constraints ->

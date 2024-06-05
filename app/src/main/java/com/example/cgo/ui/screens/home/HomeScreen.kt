@@ -40,7 +40,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.cgo.data.database.entities.EventWithUsers
-import com.example.cgo.ui.OCGRoute
+import com.example.cgo.ui.CGORoute
 import com.example.cgo.ui.composables.NoItemPlaceholder
 import kotlinx.coroutines.launch
 
@@ -54,7 +54,7 @@ fun HomeScreen(
         floatingActionButton = {
             FloatingActionButton(
                 containerColor = MaterialTheme.colorScheme.primary,
-                onClick = { navController.navigate(OCGRoute.EventsMap.route) }
+                onClick = { navController.navigate(CGORoute.EventsMap.route) }
             ) {
                 Icon(Icons.Outlined.LocationOn, "Event Map")
             }
@@ -182,7 +182,7 @@ fun TabContent(
                         event,
                         onClick = {
                             navController.navigate(
-                                OCGRoute.EventDetails.buildRoute(
+                                CGORoute.EventDetails.buildRoute(
                                     event.event.eventId
                                 )
                             )

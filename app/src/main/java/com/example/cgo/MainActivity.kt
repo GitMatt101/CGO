@@ -19,7 +19,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.cgo.ui.OCGNavGraph
-import com.example.cgo.ui.OCGRoute
+import com.example.cgo.ui.CGORoute
 import com.example.cgo.ui.composables.AppBar
 import com.example.cgo.ui.composables.MenuBar
 import com.example.cgo.ui.controllers.AppViewModel
@@ -56,13 +56,13 @@ class MainActivity : ComponentActivity() {
                     val backStackEntry by navController.currentBackStackEntryAsState()
                     val currentRoute by remember {
                         derivedStateOf {
-                            OCGRoute.routes.find {
+                            CGORoute.routes.find {
                                 it.route == backStackEntry?.destination?.route
-                            } ?: OCGRoute.Login
+                            } ?: CGORoute.Login
                         }
                     }
 
-                    if (currentRoute.route != OCGRoute.Login.route && currentRoute.route != OCGRoute.Registration.route) {
+                    if (currentRoute.route != CGORoute.Login.route && currentRoute.route != CGORoute.Registration.route) {
                         Scaffold(
                             topBar = { AppBar(navController, currentRoute) },
                             bottomBar = { MenuBar(navController) }

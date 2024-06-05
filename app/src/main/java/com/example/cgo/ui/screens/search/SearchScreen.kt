@@ -58,7 +58,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.navigation.NavHostController
 import com.example.cgo.data.database.entities.PrivacyType
-import com.example.cgo.ui.OCGRoute
+import com.example.cgo.ui.CGORoute
 import com.example.cgo.ui.composables.ImageWithPlaceholder
 import com.example.cgo.ui.composables.Size
 import com.example.cgo.ui.controllers.EventsState
@@ -107,9 +107,11 @@ fun SearchScreen(
                 confirmButton = {
                     TextButton(
                         onClick = {
-                            if (code > 0 && code <= eventsState.events.count()) navController.navigate(
-                                OCGRoute.EventDetails.buildRoute(code)
-                            )
+                            if (eventsState.events.any { it.eventId == code }) {
+                                navController.navigate(
+                                    CGORoute.EventDetails.buildRoute(code)
+                                )
+                            }
                         }
                     ) {
                         Text("Confirm")
@@ -248,7 +250,7 @@ fun TabContentEvents(
                             ListItem(
                                 modifier = Modifier.clickable {
                                     navController.navigate(
-                                        OCGRoute.EventDetails.buildRoute(
+                                        CGORoute.EventDetails.buildRoute(
                                             eventWithUsers.event.eventId
                                         )
                                     )
@@ -315,7 +317,7 @@ fun TabContentUsers(
                         ListItem(
                             modifier = Modifier.clickable {
                                 navController.navigate(
-                                    OCGRoute.Profile.buildRoute(
+                                    CGORoute.Profile.buildRoute(
                                         users.userId
                                     )
                                 )

@@ -22,7 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import com.example.cgo.ui.OCGRoute
+import com.example.cgo.ui.CGORoute
 import com.example.cgo.ui.controllers.AppState
 import com.example.cgo.ui.theme.Theme
 
@@ -81,7 +81,7 @@ fun DropDown(
             }
         }
         Spacer(Modifier.size(10.dp))
-        Button(onClick = { navController.navigate(OCGRoute.EditProfile.route) }) {
+        Button(onClick = { navController.navigate(CGORoute.EditProfile.route) }) {
             Text(text = "Edit Profile")
         }
     }

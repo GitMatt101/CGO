@@ -50,7 +50,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.cgo.R
-import com.example.cgo.ui.OCGRoute
+import com.example.cgo.ui.CGORoute
 import com.example.cgo.ui.composables.ImageWithPlaceholder
 import com.example.cgo.ui.composables.Size
 import com.example.cgo.utils.rememberCameraLauncher
@@ -185,7 +185,7 @@ fun RegistrationScreen(
             }
             TextButton(onClick = {
                 navController.popBackStack()
-                navController.navigate(OCGRoute.Login.route) }) {
+                navController.navigate(CGORoute.Login.route) }) {
                 Text("Already have an account? Log in")
             }
             HorizontalDivider()
