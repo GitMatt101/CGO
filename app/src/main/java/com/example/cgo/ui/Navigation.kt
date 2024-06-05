@@ -170,6 +170,7 @@ fun OCGNavGraph(
                 val registrationViewModel = koinViewModel<RegistrationViewModel>()
                 val state by registrationViewModel.state.collectAsStateWithLifecycle()
                 RegistrationScreen(
+                    usersState = usersState,
                     state = state,
                     actions = registrationViewModel.actions,
                     onSubmit = {
