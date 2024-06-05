@@ -255,8 +255,7 @@ fun OCGNavGraph(
                                 username = "",
                                 email = "",
                                 password = "",
-                                profilePicture = null,
-                                gamesWon = -1
+                                profilePicture = null
                             ),
                             events = emptyList(),
                             wonEvents = emptyList(),
@@ -323,8 +322,7 @@ fun OCGNavGraph(
                             username = "",
                             email = "",
                             password = "",
-                            profilePicture = null,
-                            gamesWon = -1
+                            profilePicture = null
                         )
                     )
                 }
@@ -478,8 +476,7 @@ fun OCGNavGraph(
                             username = "NONE",
                             email = "",
                             password = "",
-                            profilePicture = Uri.EMPTY.toString(),
-                            gamesWon = 0
+                            profilePicture = Uri.EMPTY.toString()
                         )
                     )
                 }
@@ -510,7 +507,6 @@ fun OCGNavGraph(
                                 username = newUsername,
                                 email = user.email,
                                 password = user.password,
-                                gamesWon = user.gamesWon,
                                 profilePicture = newProfilePicture.toString()
                             )
                             usersViewModel.updateUser(updatedUser)

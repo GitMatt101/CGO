@@ -256,6 +256,7 @@ fun ParticipantsList(
                                     onClick = {
                                         onWinnerSelection(user.userId)
                                         winnerId = user.userId
+                                        currentParticipants = loadParticipants()
                                     }
                                 ) {
                                     Text(text = "Select Winner", fontSize = 15.sp)
@@ -266,6 +267,8 @@ fun ParticipantsList(
                                     contentDescription = "Winner",
                                     modifier = Modifier
                                         .clickable {
+                                            if (loggedUserId != event.eventCreatorId)
+                                                return@clickable
                                             onWinnerDeselected()
                                             currentParticipants = loadParticipants()
                                         }

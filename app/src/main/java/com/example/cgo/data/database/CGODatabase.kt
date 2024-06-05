@@ -9,7 +9,7 @@ import com.example.cgo.data.database.entities.Event
 import com.example.cgo.data.database.entities.Participation
 import com.example.cgo.data.database.entities.User
 
-@Database(entities = [Event::class, User::class, Participation::class], version = 6)
+@Database(entities = [Event::class, User::class, Participation::class], version = 7)
 abstract class CGODatabase : RoomDatabase() {
     abstract fun eventDAO(): EventDAO
     abstract fun userDAO(): UserDAO
