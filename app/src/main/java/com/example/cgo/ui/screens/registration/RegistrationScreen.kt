@@ -187,14 +187,15 @@ fun RegistrationScreen(
             }
             TextButton(onClick = {
                 navController.popBackStack()
-                navController.navigate(CGORoute.Login.route) }) {
+                navController.navigate(CGORoute.Login.route)
+            }) {
                 Text("Already have an account? Log in")
             }
             HorizontalDivider()
             Button(
                 modifier = Modifier.padding(bottom = PADDING),
                 onClick = {
-                    if (!state.canSubmit) {
+                    if (!state.canSubmit || usersState.users.any { it.email == state.email }) {
                         when {
                             state.username.isBlank() -> {
                                 snackbarMessage = "Username is required"
