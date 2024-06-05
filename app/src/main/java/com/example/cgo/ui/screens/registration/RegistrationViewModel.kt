@@ -24,8 +24,7 @@ data class RegistrationState(
         username = username,
         email = email,
         password = password,
-        profilePicture = profilePicture.toString(),
-        gamesWon = 0
+        profilePicture = profilePicture.toString()
     )
 }
 

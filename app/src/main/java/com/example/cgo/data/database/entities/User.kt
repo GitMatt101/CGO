@@ -19,8 +19,5 @@ data class User(
     val password: String,
 
     @ColumnInfo
-    val profilePicture: String?,
-
-    @ColumnInfo
-    val gamesWon: Int
+    val profilePicture: String?
 )

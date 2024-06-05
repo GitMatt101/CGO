@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -38,6 +40,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
@@ -58,10 +61,10 @@ fun EventDetailsScreen(
     navController: NavHostController,
     onSubscription: (Int) -> Unit,
     onSubscriptionCanceled: (Int) -> Unit,
-    onWinnerSelection: (User, User?) -> Unit,
-    onDelete: (User?) -> Unit,
+    onWinnerSelection: (Int) -> Unit,
+    onDelete: () -> Unit,
     loadParticipants: () -> List<User>,
-    onWinnerDeselected: (User) -> Unit
+    onWinnerDeselected: () -> Unit
 ) {
     val context = LocalContext.current
 
@@ -99,13 +102,19 @@ fun EventDetailsScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
-                .padding(contentPadding)
+                .padding(
+                    top = 0.dp,
+                    bottom = 0.dp,
+                    start = contentPadding.calculateStartPadding(LayoutDirection.Ltr),
+                    end = contentPadding.calculateEndPadding(LayoutDirection.Rtl)
+                )
                 .verticalScroll(rememberScrollState())
         ) {
             Text(
                 eventWithUsers.event.title,
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
-                style = MaterialTheme.typography.titleLarge
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.padding(top = 10.dp)
             )
             Text(
                 eventWithUsers.event.description,
@@ -177,7 +186,7 @@ fun EventDetailsScreen(
             )
             if (eventCreator.userId == loggedUserId) {
                 Button(
-                    onClick = { onDelete(participants.find { it.userId == eventWithUsers.event.winnerId }) },
+                    onClick = onDelete,
                     colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
                     shape = CircleShape
                 ) {
@@ -195,6 +204,7 @@ fun EventDetailsScreen(
                 onWinnerDeselected = onWinnerDeselected,
                 loadParticipants = loadParticipants
             )
+            Spacer(modifier = Modifier.size(60.dp))
         }
     }
 }
@@ -205,9 +215,9 @@ fun ParticipantsList(
     participants: List<User>,
     loggedUserId: Int,
     navController: NavHostController,
-    onWinnerSelection: (User, User?) -> Unit,
+    onWinnerSelection: (Int) -> Unit,
     loadParticipants: () -> List<User>,
-    onWinnerDeselected: (User) -> Unit
+    onWinnerDeselected: () -> Unit
 ) {
     var currentParticipants by remember { mutableStateOf(participants) }
     Column(
@@ -250,14 +260,13 @@ fun ParticipantsList(
                             }
                         },
                         trailingContent = {
-                            val previousWinner =
-                                currentParticipants.find { user.userId == winnerId }
                             if (user.userId != winnerId && loggedUserId == event.eventCreatorId) {
                                 Button(
                                     modifier = Modifier.align(alignment = Alignment.End),
                                     onClick = {
-                                        onWinnerSelection(user, previousWinner)
+                                        onWinnerSelection(user.userId)
                                         winnerId = user.userId
+                                        currentParticipants = loadParticipants()
                                     }
                                 ) {
                                     Text(text = "Select Winner", fontSize = 15.sp)
@@ -268,7 +277,9 @@ fun ParticipantsList(
                                     contentDescription = "Winner",
                                     modifier = Modifier
                                         .clickable {
-                                            onWinnerDeselected(previousWinner!!)
+                                            if (loggedUserId != event.eventCreatorId)
+                                                return@clickable
+                                            onWinnerDeselected()
                                             currentParticipants = loadParticipants()
                                         }
                                 )
