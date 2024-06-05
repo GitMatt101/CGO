@@ -2,7 +2,6 @@ package com.example.cgo.ui.screens.eventdetails
 
 import android.annotation.SuppressLint
 import android.content.Intent
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -13,6 +12,7 @@ import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Share
@@ -35,7 +35,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -60,8 +59,9 @@ fun EventDetailsScreen(
     onSubscription: (Int) -> Unit,
     onSubscriptionCanceled: (Int) -> Unit,
     onWinnerSelection: (User, User?) -> Unit,
-    onDelete: () -> Unit,
-    loadParticipants: () -> List<User>
+    onDelete: (User?) -> Unit,
+    loadParticipants: () -> List<User>,
+    onWinnerDeselected: (User) -> Unit
 ) {
     val context = LocalContext.current
 
@@ -76,7 +76,8 @@ fun EventDetailsScreen(
                         + eventWithUsers.event.title
                         + " using code "
                         + eventWithUsers.event.eventId
-                        + " on OCG!")
+                        + " on OCG!"
+            )
         }
         val shareIntent = Intent.createChooser(sendIntent, "Share event")
         if (shareIntent.resolveActivity(context.packageManager) != null) {
@@ -106,15 +107,6 @@ fun EventDetailsScreen(
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
                 style = MaterialTheme.typography.titleLarge
             )
-            if (eventCreator.userId == loggedUserId && eventWithUsers.event.winnerId == null) {
-                Button(
-                    onClick = onDelete,
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
-                    shape = RectangleShape
-                ) {
-                    Text(text = "Delete")
-                }
-            }
             Text(
                 eventWithUsers.event.description,
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -146,7 +138,7 @@ fun EventDetailsScreen(
                     Text(text = "Cancel Participation")
                 }
             } else if (eventWithUsers.event.maxParticipants > eventWithUsers.participants.size && eventWithUsers.event.winnerId == null) {
-                Button (
+                Button(
                     onClick = {
                         onSubscription(eventWithUsers.event.eventId)
                         isParticipant = true
@@ -170,7 +162,10 @@ fun EventDetailsScreen(
                 headlineContent = { Text(text = "[OWNER]") },
                 trailingContent = {
                     Row {
-                        ImageWithPlaceholder(uri = eventCreator.profilePicture?.toUri(), size = Size.VerySmall)
+                        ImageWithPlaceholder(
+                            uri = eventCreator.profilePicture?.toUri(),
+                            size = Size.VerySmall
+                        )
                         Text(
                             modifier = Modifier
                                 .padding(start = 10.dp)
@@ -180,39 +175,58 @@ fun EventDetailsScreen(
                     }
                 }
             )
+            if (eventCreator.userId == loggedUserId) {
+                Button(
+                    onClick = { onDelete(participants.find { it.userId == eventWithUsers.event.winnerId }) },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
+                    shape = CircleShape
+                ) {
+                    Text(text = "Delete event")
+                }
+            }
+
             HorizontalDivider()
-            ParticipantsList (
+            ParticipantsList(
                 event = eventWithUsers.event,
                 participants = participants,
                 loggedUserId = loggedUserId,
                 navController = navController,
-                onWinnerSelection = onWinnerSelection
+                onWinnerSelection = onWinnerSelection,
+                onWinnerDeselected = onWinnerDeselected,
+                loadParticipants = loadParticipants
             )
         }
     }
 }
 
 @Composable
-fun ParticipantsList (
+fun ParticipantsList(
     event: Event,
     participants: List<User>,
     loggedUserId: Int,
     navController: NavHostController,
-    onWinnerSelection: (User, User?) -> Unit
+    onWinnerSelection: (User, User?) -> Unit,
+    loadParticipants: () -> List<User>,
+    onWinnerDeselected: (User) -> Unit
 ) {
-    Column (
+    var currentParticipants by remember { mutableStateOf(participants) }
+    Column(
         modifier = Modifier
             .padding(horizontal = 10.dp)
             .padding(bottom = 10.dp)
     ) {
-        Text(text = "Participants (${participants.size}/${event.maxParticipants})", fontWeight = FontWeight.Bold, modifier = Modifier.align(Alignment.CenterHorizontally))
+        Text(
+            text = "Participants (${currentParticipants.size}/${event.maxParticipants})",
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        )
         Spacer(Modifier.size(10.dp))
-        if (participants.isNotEmpty()) {
-            Column (
+        if (currentParticipants.isNotEmpty()) {
+            Column(
                 modifier = Modifier.border(2.dp, Color.Gray)
             ) {
                 var winnerId by remember { mutableStateOf(event.winnerId) }
-                participants.forEach { user: User ->
+                currentParticipants.forEach { user: User ->
                     ListItem(
                         modifier = Modifier.clickable(onClick = {
                             navController.navigate(
@@ -236,11 +250,12 @@ fun ParticipantsList (
                             }
                         },
                         trailingContent = {
+                            val previousWinner =
+                                currentParticipants.find { user.userId == winnerId }
                             if (user.userId != winnerId && loggedUserId == event.eventCreatorId) {
                                 Button(
                                     modifier = Modifier.align(alignment = Alignment.End),
                                     onClick = {
-                                        val previousWinner = participants.find { it.userId == event.winnerId }
                                         onWinnerSelection(user, previousWinner)
                                         winnerId = user.userId
                                     }
@@ -250,7 +265,12 @@ fun ParticipantsList (
                             } else if (user.userId == winnerId) {
                                 Icon(
                                     painter = painterResource(id = R.drawable.winner),
-                                    contentDescription = "Winner"
+                                    contentDescription = "Winner",
+                                    modifier = Modifier
+                                        .clickable {
+                                            onWinnerDeselected(previousWinner!!)
+                                            currentParticipants = loadParticipants()
+                                        }
                                 )
                             }
                         }

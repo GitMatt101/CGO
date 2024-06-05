@@ -432,6 +432,18 @@ fun OCGNavGraph(
                         onDelete = {
                             eventsVm.deleteEvent(eventWithUsers.event)
                             navController.navigateUp()
+                            it?.let {
+                                usersViewModel.updateUser(
+                                    User(
+                                        userId = it.userId,
+                                        username = it.username,
+                                        email = it.email,
+                                        password = it.password,
+                                        profilePicture = it.profilePicture,
+                                        gamesWon = it.gamesWon - 1
+                                    )
+                                )
+                            }
                         },
                         loadParticipants = {
                             isEventCoroutineFinished = false
@@ -450,6 +462,33 @@ fun OCGNavGraph(
                                 }
                             )
                             return@EventDetailsScreen eventWithUsers.participants
+                        },
+                        onWinnerDeselected = {
+                            eventsVm.updateEvent(
+                                Event(
+                                    eventId = eventWithUsers.event.eventId,
+                                    title = eventWithUsers.event.title,
+                                    description = eventWithUsers.event.description,
+                                    date = eventWithUsers.event.date,
+                                    time = eventWithUsers.event.time,
+                                    address = eventWithUsers.event.address,
+                                    city = eventWithUsers.event.city,
+                                    maxParticipants = eventWithUsers.event.maxParticipants,
+                                    privacyType = eventWithUsers.event.privacyType,
+                                    eventCreatorId = eventWithUsers.event.eventCreatorId,
+                                    winnerId = null
+                                )
+                            )
+                            usersViewModel.updateUser(
+                                User(
+                                    userId = it.userId,
+                                    username = it.username,
+                                    email = it.email,
+                                    password = it.password,
+                                    profilePicture = it.profilePicture,
+                                    gamesWon = it.gamesWon - 1
+                                )
+                            )
                         }
                     )
                 }

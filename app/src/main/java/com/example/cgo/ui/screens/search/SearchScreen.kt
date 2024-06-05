@@ -94,9 +94,8 @@ fun SearchScreen(
             AlertDialog(
                 title = { Text("Private event") },
                 text = {
-                    Text("Insert code to access the private event")
                     TextField(
-                        label = { Text("Code") },
+                        label = { Text("Private event code") },
                         value = if (code == 0) "" else code.toString(),
                         onValueChange = { code = it.toIntOrNull() ?: 0 },
                         keyboardOptions = KeyboardOptions(
