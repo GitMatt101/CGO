@@ -102,7 +102,7 @@ fun TabsContent(pagerState: PagerState, usersWithEvents: List<UserWithEvents>, n
             )
             1 -> TabContentScreen(
                 navController = navController,
-                users = usersWithEvents.map { Pair(it.user, it.user.gamesWon) }.sortedBy { -it.second },
+                users = usersWithEvents.map { Pair(it.user, it.wonEvents.size) }.sortedBy { -it.second },
                 text = "Events Won"
             )
             2 -> TabContentScreen(
